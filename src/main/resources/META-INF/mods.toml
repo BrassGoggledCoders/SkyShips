@@ -1,0 +1,25 @@
+modLoader="javafml"
+loaderVersion="[36,)"
+license="MIT"
+
+[[mods]] 
+modId="skyships" 
+version="${file.jarVersion}"
+displayName="Sky Ships"
+authors="DivineAspect,SkySom"
+description='''
+'''
+
+[[dependencies.skyships]]
+    modId="forge"
+    mandatory=true
+    versionRange="[36.2.4,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.skyships]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.16.5,1.17)"
+    ordering="NONE"
+    side="BOTH"
