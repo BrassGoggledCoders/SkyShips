@@ -65,8 +65,8 @@ public class SkyShipEntity extends Entity {
     private double waterLevel;
     private float landFriction;
 
-    private BoatEntity.Status status;
-    private BoatEntity.Status oldStatus;
+    private Status status;
+    private Status oldStatus;
     private double lastYd;
 
     public SkyShipEntity(EntityType<?> type, World level) {
@@ -190,7 +190,7 @@ public class SkyShipEntity extends Entity {
 
     @Override
     public void push(@Nonnull Entity pEntity) {
-        if (pEntity instanceof BoatEntity) {
+        if (pEntity instanceof BoatEntity || pEntity instanceof SkyShipEntity) {
             if (pEntity.getBoundingBox().minY < this.getBoundingBox().maxY) {
                 super.push(pEntity);
             }
@@ -225,7 +225,7 @@ public class SkyShipEntity extends Entity {
     public void tick() {
         this.oldStatus = this.status;
         this.status = this.getStatus();
-        if (this.status != BoatEntity.Status.UNDER_WATER && this.status != BoatEntity.Status.UNDER_FLOWING_WATER) {
+        if (this.status != Status.UNDER_FLUID && this.status != Status.UNDER_FLOWING_FLUID) {
             this.outOfControlTicks = 0.0F;
         } else {
             ++this.outOfControlTicks;
@@ -300,29 +300,29 @@ public class SkyShipEntity extends Entity {
     }
 
     private void floatBoat() {
-        double d1 = this.entityData.get(DATA_ID_VERTICAL) > 0 ? 0.1D : this.isNoGravity() ? 0.0D : (double) -0.0004F;
+        double d1 = this.entityData.get(DATA_ID_VERTICAL) > 0 ? 0.01D : this.isNoGravity() ? 0.0D : (double) -0.0004F;
         double d2 = 0.0D;
         float invFriction = 0.05F;
-        if (this.oldStatus == BoatEntity.Status.IN_AIR && this.status != BoatEntity.Status.IN_AIR && this.status != BoatEntity.Status.ON_LAND) {
+        if (this.oldStatus == Status.IN_AIR && this.status != Status.IN_AIR && this.status != Status.ON_LAND) {
             this.waterLevel = this.getY(1.0D);
             this.setPos(this.getX(), (double) (this.getWaterLevelAbove() - this.getBbHeight()) + 0.101D, this.getZ());
             this.setDeltaMovement(this.getDeltaMovement().multiply(1.0D, 0.0D, 1.0D));
             this.lastYd = 0.0D;
-            this.status = BoatEntity.Status.IN_WATER;
+            this.status = Status.IN_FLUID;
         } else {
-            if (this.status == BoatEntity.Status.IN_WATER) {
+            if (this.status == Status.IN_FLUID) {
                 d2 = (this.waterLevel - this.getY()) / (double) this.getBbHeight();
-                invFriction = 0.9F;
-            } else if (this.status == BoatEntity.Status.UNDER_FLOWING_WATER) {
-                d1 = -7.0E-4D;
-                invFriction = 0.9F;
-            } else if (this.status == BoatEntity.Status.UNDER_WATER) {
-                d2 = 0.01F;
                 invFriction = 0.45F;
-            } else if (this.status == BoatEntity.Status.IN_AIR) {
-                invFriction = 0.01F;
-            } else if (this.status == BoatEntity.Status.ON_LAND) {
-                invFriction = this.landFriction;
+            } else if (this.status == Status.UNDER_FLOWING_FLUID) {
+                d1 = -7.0E-4D;
+                invFriction = 0.45F;
+            } else if (this.status == Status.UNDER_FLUID) {
+                d2 = 0.01F;
+                invFriction = 0.25F;
+            } else if (this.status == Status.IN_AIR) {
+                invFriction = 0.7F;
+            } else if (this.status == Status.ON_LAND) {
+                invFriction = this.landFriction / 2;
                 if (this.getControllingPassenger() instanceof PlayerEntity) {
                     this.landFriction /= 2.0F;
                 }
@@ -376,37 +376,37 @@ public class SkyShipEntity extends Entity {
     }
 
 
-    protected BoatEntity.Status getStatus() {
-        BoatEntity.Status status = this.isUnderwater();
+    protected Status getStatus() {
+        Status status = this.isUnderFluid();
         if (status != null) {
             this.waterLevel = this.getBoundingBox().maxY;
             return status;
         } else if (this.checkInWater()) {
-            return BoatEntity.Status.IN_WATER;
+            return Status.IN_FLUID;
         } else {
             float f = this.getGroundFriction();
             if (f > 0.0F) {
                 this.landFriction = f;
-                return BoatEntity.Status.ON_LAND;
+                return Status.ON_LAND;
             } else {
-                return BoatEntity.Status.IN_AIR;
+                return Status.IN_AIR;
             }
         }
     }
 
     public float getGroundFriction() {
-        AxisAlignedBB axisalignedbb = this.getBoundingBox();
-        AxisAlignedBB axisalignedbb1 = new AxisAlignedBB(axisalignedbb.minX, axisalignedbb.minY - 0.001D, axisalignedbb.minZ, axisalignedbb.maxX, axisalignedbb.minY, axisalignedbb.maxZ);
-        int i = MathHelper.floor(axisalignedbb1.minX) - 1;
-        int j = MathHelper.ceil(axisalignedbb1.maxX) + 1;
-        int k = MathHelper.floor(axisalignedbb1.minY) - 1;
-        int l = MathHelper.ceil(axisalignedbb1.maxY) + 1;
-        int i1 = MathHelper.floor(axisalignedbb1.minZ) - 1;
-        int j1 = MathHelper.ceil(axisalignedbb1.maxZ) + 1;
-        VoxelShape voxelshape = VoxelShapes.create(axisalignedbb1);
+        AxisAlignedBB boundingBox = this.getBoundingBox();
+        AxisAlignedBB groundBoundingBox = new AxisAlignedBB(boundingBox.minX, boundingBox.minY - 0.001D, boundingBox.minZ, boundingBox.maxX, boundingBox.minY, boundingBox.maxZ);
+        int i = MathHelper.floor(groundBoundingBox.minX) - 1;
+        int j = MathHelper.ceil(groundBoundingBox.maxX) + 1;
+        int k = MathHelper.floor(groundBoundingBox.minY) - 1;
+        int l = MathHelper.ceil(groundBoundingBox.maxY) + 1;
+        int i1 = MathHelper.floor(groundBoundingBox.minZ) - 1;
+        int j1 = MathHelper.ceil(groundBoundingBox.maxZ) + 1;
+        VoxelShape voxelshape = VoxelShapes.create(groundBoundingBox);
         float f = 0.0F;
         int k1 = 0;
-        BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable();
+        BlockPos.Mutable checkPosition = new BlockPos.Mutable();
 
         for (int l1 = i; l1 < j; ++l1) {
             for (int i2 = i1; i2 < j1; ++i2) {
@@ -414,11 +414,11 @@ public class SkyShipEntity extends Entity {
                 if (j2 != 2) {
                     for (int k2 = k; k2 < l; ++k2) {
                         if (j2 <= 0 || k2 != k && k2 != l - 1) {
-                            blockpos$mutable.set(l1, k2, i2);
-                            BlockState blockstate = this.level.getBlockState(blockpos$mutable);
+                            checkPosition.set(l1, k2, i2);
+                            BlockState blockstate = this.level.getBlockState(checkPosition);
                             if (!(blockstate.getBlock() instanceof LilyPadBlock) &&
-                                    VoxelShapes.joinIsNotEmpty(blockstate.getCollisionShape(this.level, blockpos$mutable).move(l1, k2, i2), voxelshape, IBooleanFunction.AND)) {
-                                f += blockstate.getSlipperiness(this.level, blockpos$mutable, this);
+                                    VoxelShapes.joinIsNotEmpty(blockstate.getCollisionShape(this.level, checkPosition).move(l1, k2, i2), voxelshape, IBooleanFunction.AND)) {
+                                f += blockstate.getSlipperiness(this.level, checkPosition, this);
                                 ++k1;
                             }
                         }
@@ -460,7 +460,7 @@ public class SkyShipEntity extends Entity {
     }
 
     @Nullable
-    private BoatEntity.Status isUnderwater() {
+    private Status isUnderFluid() {
         AxisAlignedBB axisalignedbb = this.getBoundingBox();
         double d0 = axisalignedbb.maxY + 0.001D;
         int i = MathHelper.floor(axisalignedbb.minX);
@@ -470,16 +470,16 @@ public class SkyShipEntity extends Entity {
         int i1 = MathHelper.floor(axisalignedbb.minZ);
         int j1 = MathHelper.ceil(axisalignedbb.maxZ);
         boolean flag = false;
-        BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable();
+        BlockPos.Mutable mutablePos = new BlockPos.Mutable();
 
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
-                    blockpos$mutable.set(k1, l1, i2);
-                    FluidState fluidstate = this.level.getFluidState(blockpos$mutable);
-                    if (fluidstate.is(FluidTags.WATER) && d0 < (double) ((float) blockpos$mutable.getY() + fluidstate.getHeight(this.level, blockpos$mutable))) {
+                    mutablePos.set(k1, l1, i2);
+                    FluidState fluidstate = this.level.getFluidState(mutablePos);
+                    if (d0 < (double) ((float) mutablePos.getY() + fluidstate.getHeight(this.level, mutablePos))) {
                         if (!fluidstate.isSource()) {
-                            return BoatEntity.Status.UNDER_FLOWING_WATER;
+                            return Status.UNDER_FLOWING_FLUID;
                         }
 
                         flag = true;
@@ -488,7 +488,7 @@ public class SkyShipEntity extends Entity {
             }
         }
 
-        return flag ? BoatEntity.Status.UNDER_WATER : null;
+        return flag ? Status.UNDER_FLUID : null;
     }
 
     protected SoundEvent getPaddleSound() {
@@ -541,7 +541,7 @@ public class SkyShipEntity extends Entity {
             Vector3d vector3d = this.getDeltaMovement();
             this.setDeltaMovement(new Vector3d(
                     vector3d.x + MathHelper.sin(-this.yRot * ((float) Math.PI / 180F)) * f,
-                    this.inputVertical > 0 ? Math.min(0.5F, vector3d.y + 0.1F) : 0F,
+                    this.inputVertical > 0 ? 0.05F : 0F,
                     vector3d.z + MathHelper.cos(this.yRot * ((float) Math.PI / 180F)) * f)
             );
             this.setPaddleState(this.inputRight && !this.inputLeft || this.inputUp, this.inputLeft && !this.inputRight || this.inputUp, inputVertical);
@@ -679,5 +679,13 @@ public class SkyShipEntity extends Entity {
 
     public int getHurtDir() {
         return this.entityData.get(DATA_ID_HURT_DIR);
+    }
+
+    public enum Status {
+        IN_FLUID,
+        UNDER_FLUID,
+        UNDER_FLOWING_FLUID,
+        ON_LAND,
+        IN_AIR
     }
 }
