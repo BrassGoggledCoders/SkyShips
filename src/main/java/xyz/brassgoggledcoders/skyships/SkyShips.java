@@ -7,6 +7,7 @@ import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.fml.common.Mod;
+import xyz.brassgoggledcoders.skyships.content.SkyShipsBlocks;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsEntities;
 import xyz.brassgoggledcoders.skyships.network.NetworkHandler;
 
@@ -31,6 +32,7 @@ public class SkyShips {
     public SkyShips() {
         networkHandler = new NetworkHandler();
         SkyShipsEntities.setup();
+        SkyShipsBlocks.setup();
     }
 
     public static Registrate getRegistrate() {

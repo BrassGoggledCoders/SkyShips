@@ -15,6 +15,7 @@ public class SkyShipsEntities {
                     .sized(1.375f, 0.5625f)
             )
             .renderer(() -> SkyShipRenderer::new)
+            .tag(SkyShipsEntityTags.DOCKABLE)
             .register();
 
     public static void setup() {

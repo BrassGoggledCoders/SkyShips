@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "skyships:block/aeroporte_controller"
+    }
+  }
+}
