@@ -13,13 +13,13 @@ description='''
 [[dependencies.skyships]]
     modId="forge"
     mandatory=true
-    versionRange="[36.2.4,)"
+    versionRange="[39.0.45,)"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.skyships]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.16.5,1.17)"
+    versionRange="[1.18.1,1.19)"
     ordering="NONE"
     side="BOTH"
