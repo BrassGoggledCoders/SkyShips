@@ -20,14 +20,13 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.ticks.ScheduledTick;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsEntityTags;
-import xyz.brassgoggledcoders.skyships.entity.AeroporteHookEntity;
+import xyz.brassgoggledcoders.skyships.entity.AeroporteHook;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-
-import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 
 public class AeroportePostBlock extends Block {
     public static final EnumProperty<Direction> HORIZONTAL_FACING = BlockStateProperties.HORIZONTAL_FACING;
@@ -74,7 +73,7 @@ public class AeroportePostBlock extends Block {
     @ParametersAreNonnullByDefault
     public BlockState updateShape(BlockState pState, Direction pFacing, BlockState pFacingState, LevelAccessor pLevel, BlockPos pCurrentPos, BlockPos pFacingPos) {
         if (pState.getValue(WATERLOGGED)) {
-            pLevel.getLiquidTicks().scheduleTick(pCurrentPos, Fluids.WATER, Fluids.WATER.getTickDelay(pLevel));
+            pLevel.scheduleTick(pCurrentPos, Fluids.WATER, Fluids.WATER.getTickDelay(pLevel));
         }
 
         return pState;
@@ -96,7 +95,7 @@ public class AeroportePostBlock extends Block {
     @SuppressWarnings("deprecation")
     @ParametersAreNonnullByDefault
     public void entityInside(BlockState blockState, Level world, BlockPos blockPos, Entity entity) {
-        if (!(entity.getVehicle() instanceof AeroporteHookEntity) && entity.getType().is(SkyShipsEntityTags.DOCKABLE)) {
+        if (!(entity.getVehicle() instanceof AeroporteHook) && entity.getType().is(SkyShipsEntityTags.DOCKABLE)) {
             BlockPos.MutableBlockPos mutableDown = blockPos.mutable().move(Direction.DOWN);
             BlockState below = world.getBlockState(mutableDown);
             Direction facing = blockState.getValue(HORIZONTAL_FACING);

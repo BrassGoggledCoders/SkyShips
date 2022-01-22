@@ -5,30 +5,31 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import com.mojang.math.Vector3f;
 import xyz.brassgoggledcoders.skyships.SkyShips;
-import xyz.brassgoggledcoders.skyships.entity.SkyShipEntity;
+import xyz.brassgoggledcoders.skyships.entity.SkyShip;
 
 import javax.annotation.Nonnull;
 
-public class SkyShipRenderer extends EntityRenderer<SkyShipEntity> {
+public class SkyShipRenderer extends EntityRenderer<SkyShip> {
     private static final ResourceLocation BALLOON_TEXTURE = SkyShips.rl("textures/entity/sky_ship_balloon.png");
     private static final ResourceLocation STEERING_TEXTURE = SkyShips.rl("textures/entity/sky_ship_steering.png");
     private static final ResourceLocation GONDOLA_TEXTURE = SkyShips.rl("textures/entity/sky_ship_gondola.png");
 
-    private final SkyShipSteeringModel<SkyShipEntity> steeringModel = new SkyShipSteeringModel<>();
-    private final SkyShipBalloonModel<SkyShipEntity> balloonModel = new SkyShipBalloonModel<>();
-    private final SkyShipGondolaModel<SkyShipEntity> gondolaModel = new SkyShipGondolaModel<>();
+    private final SkyShipSteeringModel<SkyShip> steeringModel = new SkyShipSteeringModel<>();
+    private final SkyShipBalloonModel<SkyShip> balloonModel = new SkyShipBalloonModel<>();
+    private final SkyShipGondolaModel<SkyShip> gondolaModel = new SkyShipGondolaModel<>();
 
-    public SkyShipRenderer(EntityRenderDispatcher rendererManager) {
+    public SkyShipRenderer(EntityRendererProvider.Context rendererManager) {
         super(rendererManager);
     }
 
     @Override
-    public void render(SkyShipEntity pEntity, float pEntityYaw, float pPartialTicks, PoseStack pMatrixStack, @Nonnull MultiBufferSource pBuffer, int pPackedLight) {
+    public void render(SkyShip pEntity, float pEntityYaw, float pPartialTicks, PoseStack pMatrixStack, @Nonnull MultiBufferSource pBuffer, int pPackedLight) {
         pMatrixStack.pushPose();
         pMatrixStack.translate(0.0D, 0.375D, 0.0D);
         pMatrixStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - pEntityYaw));
@@ -65,7 +66,7 @@ public class SkyShipRenderer extends EntityRenderer<SkyShipEntity> {
 
     @Override
     @Nonnull
-    public ResourceLocation getTextureLocation(@Nonnull SkyShipEntity pEntity) {
+    public ResourceLocation getTextureLocation(@Nonnull SkyShip pEntity) {
         return BALLOON_TEXTURE;
     }
 }

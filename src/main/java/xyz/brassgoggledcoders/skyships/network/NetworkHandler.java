@@ -1,8 +1,8 @@
 package xyz.brassgoggledcoders.skyships.network;
 
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.PacketDistributor;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.network.simple.SimpleChannel;
 import xyz.brassgoggledcoders.skyships.SkyShips;
 
 public class NetworkHandler {

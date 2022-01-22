@@ -10,14 +10,14 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
 
-public class AeroporteHookEntity extends Entity {
-    private final EntityDataAccessor<BlockPos> CONTROLLER_POS = SynchedEntityData.defineId(AeroporteHookEntity.class, EntityDataSerializers.BLOCK_POS);
+public class AeroporteHook extends Entity {
+    private final EntityDataAccessor<BlockPos> CONTROLLER_POS = SynchedEntityData.defineId(AeroporteHook.class, EntityDataSerializers.BLOCK_POS);
 
-    public AeroporteHookEntity(EntityType<?> type, Level world) {
+    public AeroporteHook(EntityType<?> type, Level world) {
         super(type, world);
     }
 

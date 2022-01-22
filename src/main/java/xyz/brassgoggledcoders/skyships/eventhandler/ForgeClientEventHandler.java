@@ -10,7 +10,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import xyz.brassgoggledcoders.skyships.SkyShips;
-import xyz.brassgoggledcoders.skyships.entity.SkyShipEntity;
+import xyz.brassgoggledcoders.skyships.entity.SkyShip;
 
 @Mod.EventBusSubscriber(modid = SkyShips.ID, bus = Bus.FORGE, value = Dist.CLIENT)
 public class ForgeClientEventHandler {
@@ -19,9 +19,9 @@ public class ForgeClientEventHandler {
     public static void handlePaddleState(TickEvent.ClientTickEvent clientTickEvent) {
         if (clientTickEvent.phase == TickEvent.Phase.START && Minecraft.getInstance().player != null) {
             LocalPlayer player = Minecraft.getInstance().player;
-            if (player.getVehicle() instanceof SkyShipEntity) {
+            if (player.getVehicle() instanceof SkyShip) {
                 Input input = player.input;
-                ((SkyShipEntity) player.getVehicle()).setInput(
+                ((SkyShip) player.getVehicle()).setInput(
                         input.left,
                         input.right,
                         input.up,
@@ -34,14 +34,12 @@ public class ForgeClientEventHandler {
 
     @SubscribeEvent
     public static void handleEnterShip(EntityMountEvent event) {
-        if (event.isMounting() && event.getEntityBeingMounted() instanceof SkyShipEntity &&
-                event.getEntityMounting() instanceof LocalPlayer) {
-            LocalPlayer player = (LocalPlayer) event.getEntityMounting();
-            SkyShipEntity shipEntity = (SkyShipEntity) event.getEntityBeingMounted();
+        if (event.isMounting() && event.getEntityBeingMounted() instanceof SkyShip shipEntity &&
+                event.getEntityMounting() instanceof LocalPlayer player) {
 
-            player.yRotO = shipEntity.yRot;
-            player.yRot = shipEntity.yRot;
-            player.setYHeadRot(shipEntity.yRot);
+            player.yRotO = shipEntity.getYRot();
+            player.setYRot(shipEntity.getYRot());
+            player.setYHeadRot(shipEntity.getYRot());
         }
     }
 }

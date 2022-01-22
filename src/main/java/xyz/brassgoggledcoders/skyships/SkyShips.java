@@ -18,7 +18,7 @@ public class SkyShips {
     public static final String ID = "skyships";
 
     private static final Lazy<Registrate> REGISTRATE_LAZY = Lazy.of(() -> Registrate.create(ID)
-            .itemGroup(() -> new CreativeModeTab(ID) {
+            .creativeModeTab(() -> new CreativeModeTab(ID) {
                 @Override
                 @Nonnull
                 public ItemStack makeIcon() {

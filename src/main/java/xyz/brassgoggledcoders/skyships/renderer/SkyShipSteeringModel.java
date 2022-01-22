@@ -4,13 +4,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
-import xyz.brassgoggledcoders.skyships.entity.SkyShipEntity;
+import xyz.brassgoggledcoders.skyships.entity.SkyShip;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @SuppressWarnings("FieldCanBeLocal")
-public class SkyShipSteeringModel<T extends SkyShipEntity> extends EntityModel<T> {
+public class SkyShipSteeringModel<T extends SkyShip> extends EntityModel<T> {
     private final ModelPart addons;
     private final ModelPart cube_r1;
     private final ModelPart cube_r2;

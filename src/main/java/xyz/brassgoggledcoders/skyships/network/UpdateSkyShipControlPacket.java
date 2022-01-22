@@ -1,9 +1,9 @@
 package xyz.brassgoggledcoders.skyships.network;
 
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.fml.network.NetworkEvent;
-import xyz.brassgoggledcoders.skyships.entity.SkyShipEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.NetworkEvent;
+import xyz.brassgoggledcoders.skyships.entity.SkyShip;
 
 import java.util.function.Supplier;
 
@@ -27,8 +27,8 @@ public class UpdateSkyShipControlPacket {
     public boolean consume(Supplier<NetworkEvent.Context> contextSupplier) {
         contextSupplier.get().enqueueWork(() -> {
             ServerPlayer player = contextSupplier.get().getSender();
-            if (player != null && player.getVehicle() instanceof SkyShipEntity) {
-                ((SkyShipEntity) player.getVehicle()).setPaddleState(
+            if (player != null && player.getVehicle() instanceof SkyShip) {
+                ((SkyShip) player.getVehicle()).setPaddleState(
                         left,
                         right,
                         vertical

@@ -1,33 +1,38 @@
 package xyz.brassgoggledcoders.skyships.entity;
 
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.WaterlilyBlock;
-import net.minecraft.entity.*;
-import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.BlockUtil;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.util.*;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.core.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.phys.shapes.BooleanOp;
-import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraft.world.level.block.WaterlilyBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.network.NetworkHooks;
 import xyz.brassgoggledcoders.skyships.SkyShips;
 
 import javax.annotation.Nonnull;
@@ -36,28 +41,14 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 import java.util.Objects;
 
-import net.minecraft.BlockUtil;
-import net.minecraft.core.Direction;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
-import net.minecraft.world.entity.EntitySelector;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.Pose;
-
-public class SkyShipEntity extends Entity {
-    private static final EntityDataAccessor<Integer> DATA_ID_HURT = SynchedEntityData.defineId(SkyShipEntity.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Integer> DATA_ID_HURT_DIR = SynchedEntityData.defineId(SkyShipEntity.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Float> DATA_ID_DAMAGE = SynchedEntityData.defineId(SkyShipEntity.class, EntityDataSerializers.FLOAT);
-    private static final EntityDataAccessor<Boolean> DATA_ID_PADDLE_LEFT = SynchedEntityData.defineId(SkyShipEntity.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<Boolean> DATA_ID_PADDLE_RIGHT = SynchedEntityData.defineId(SkyShipEntity.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<Integer> DATA_ID_BUBBLE_TIME = SynchedEntityData.defineId(SkyShipEntity.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Integer> DATA_ID_VERTICAL = SynchedEntityData.defineId(SkyShipEntity.class, EntityDataSerializers.INT);
+public class SkyShip extends Entity {
+    private static final EntityDataAccessor<Integer> DATA_ID_HURT = SynchedEntityData.defineId(SkyShip.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_ID_HURT_DIR = SynchedEntityData.defineId(SkyShip.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Float> DATA_ID_DAMAGE = SynchedEntityData.defineId(SkyShip.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Boolean> DATA_ID_PADDLE_LEFT = SynchedEntityData.defineId(SkyShip.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> DATA_ID_PADDLE_RIGHT = SynchedEntityData.defineId(SkyShip.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> DATA_ID_BUBBLE_TIME = SynchedEntityData.defineId(SkyShip.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_ID_VERTICAL = SynchedEntityData.defineId(SkyShip.class, EntityDataSerializers.INT);
 
     private final float[] paddlePositions = new float[2];
     private float outOfControlTicks;
@@ -83,13 +74,8 @@ public class SkyShipEntity extends Entity {
     private Status oldStatus;
     private double lastYd;
 
-    public SkyShipEntity(EntityType<?> type, Level level) {
+    public SkyShip(EntityType<?> type, Level level) {
         super(type, level);
-    }
-
-    @Override
-    protected boolean isMovementNoisy() {
-        return false;
     }
 
     @Override
@@ -166,13 +152,13 @@ public class SkyShipEntity extends Entity {
             this.setHurtTime(10);
             this.setDamage(this.getDamage() + pAmount * 10.0F);
             this.markHurt();
-            boolean flag = pSource.getEntity() instanceof Player && ((Player) pSource.getEntity()).abilities.instabuild;
+            boolean flag = pSource.getEntity() instanceof Player && ((Player) pSource.getEntity()).getAbilities().instabuild;
             if (flag || this.getDamage() > 40.0F) {
                 if (!flag && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
                     this.spawnLoot(pSource);
                 }
 
-                this.remove();
+                this.remove(RemovalReason.KILLED);
             }
 
             return true;
@@ -182,8 +168,7 @@ public class SkyShipEntity extends Entity {
     }
 
     private void spawnLoot(DamageSource pSource) {
-        if (this.level instanceof ServerLevel) {
-            ServerLevel serverLevel = (ServerLevel) this.level;
+        if (this.level instanceof ServerLevel serverLevel) {
 
             LootContext lootContext = new LootContext.Builder(serverLevel)
                     .withRandom(this.random)
@@ -204,7 +189,7 @@ public class SkyShipEntity extends Entity {
 
     @Override
     public void push(@Nonnull Entity pEntity) {
-        if (pEntity instanceof Boat || pEntity instanceof SkyShipEntity) {
+        if (pEntity instanceof Boat || pEntity instanceof SkyShip) {
             if (pEntity.getBoundingBox().minY < this.getBoundingBox().maxY) {
                 super.push(pEntity);
             }
@@ -432,7 +417,7 @@ public class SkyShipEntity extends Entity {
                             BlockState blockstate = this.level.getBlockState(checkPosition);
                             if (!(blockstate.getBlock() instanceof WaterlilyBlock) &&
                                     Shapes.joinIsNotEmpty(blockstate.getCollisionShape(this.level, checkPosition).move(l1, k2, i2), voxelshape, BooleanOp.AND)) {
-                                f += blockstate.getSlipperiness(this.level, checkPosition, this);
+                                f += blockstate.getFriction(this.level, checkPosition, this);
                                 ++k1;
                             }
                         }
@@ -519,12 +504,12 @@ public class SkyShipEntity extends Entity {
             double d0 = this.getX() + (this.lerpX - this.getX()) / (double) this.lerpSteps;
             double d1 = this.getY() + (this.lerpY - this.getY()) / (double) this.lerpSteps;
             double d2 = this.getZ() + (this.lerpZ - this.getZ()) / (double) this.lerpSteps;
-            double d3 = Mth.wrapDegrees(this.lerpYRot - (double) this.yRot);
-            this.yRot = (float) ((double) this.yRot + d3 / (double) this.lerpSteps);
-            this.xRot = (float) ((double) this.xRot + (this.lerpXRot - (double) this.xRot) / (double) this.lerpSteps);
+            double d3 = Mth.wrapDegrees(this.lerpYRot - (double) this.getYRot());
+            this.setYRot((float) ((double) this.getYRot() + d3 / (double) this.lerpSteps));
+            this.setXRot((float) ((double) this.getXRot() + (this.lerpXRot - (double) this.getYRot()) / (double) this.lerpSteps));
             --this.lerpSteps;
             this.setPos(d0, d1, d2);
-            this.setRot(this.yRot, this.xRot);
+            this.setRot(this.getYRot(), this.getXRot());
         }
     }
 
@@ -543,7 +528,7 @@ public class SkyShipEntity extends Entity {
                 f += 0.005F;
             }
 
-            this.yRot += this.deltaRotation;
+            this.setYRot(this.getYRot() + this.deltaRotation);
             if (this.inputUp) {
                 f += 0.04F;
             }
@@ -554,9 +539,9 @@ public class SkyShipEntity extends Entity {
 
             Vec3 vector3d = this.getDeltaMovement();
             this.setDeltaMovement(new Vec3(
-                    vector3d.x + Mth.sin(-this.yRot * ((float) Math.PI / 180F)) * f,
+                    vector3d.x + Mth.sin(-this.getYRot() * ((float) Math.PI / 180F)) * f,
                     this.inputVertical > 0 ? 0.05F : 0F,
-                    vector3d.z + Mth.cos(this.yRot * ((float) Math.PI / 180F)) * f)
+                    vector3d.z + Mth.cos(this.getYRot() * ((float) Math.PI / 180F)) * f)
             );
             this.setPaddleState(this.inputRight && !this.inputLeft || this.inputUp, this.inputLeft && !this.inputRight || this.inputUp, inputVertical);
         }
@@ -580,9 +565,9 @@ public class SkyShipEntity extends Entity {
                 }
             }
 
-            Vec3 vector3d = (new Vec3(f, 0.0D, 0.0D)).yRot(-this.yRot * ((float) Math.PI / 180F) - ((float) Math.PI / 2F));
+            Vec3 vector3d = (new Vec3(f, 0.0D, 0.0D)).yRot(-this.getYRot() * ((float) Math.PI / 180F) - ((float) Math.PI / 2F));
             pPassenger.setPos(this.getX() + vector3d.x, this.getY() + (double) f1, this.getZ() + vector3d.z);
-            pPassenger.yRot += this.deltaRotation;
+            pPassenger.setYRot(pPassenger.getYRot() + this.deltaRotation);
             pPassenger.setYHeadRot(pPassenger.getYHeadRot() + this.deltaRotation);
             this.clampRotation(pPassenger);
             if (pPassenger instanceof Animal && this.getPassengers().size() > 1) {
@@ -594,22 +579,18 @@ public class SkyShipEntity extends Entity {
         }
     }
 
-    public float getRowingTime(int pSide, float pLimbSwing) {
-        return this.getPaddleState(pSide) ? (float) Mth.clampedLerp((double) this.paddlePositions[pSide] - (double) ((float) Math.PI / 8F), this.paddlePositions[pSide], pLimbSwing) : 0.0F;
-    }
-
     @Override
     public void onPassengerTurned(@Nonnull Entity pEntityToUpdate) {
         this.clampRotation(pEntityToUpdate);
     }
 
     protected void clampRotation(Entity pEntityToUpdate) {
-        pEntityToUpdate.setYBodyRot(this.yRot);
-        float f = Mth.wrapDegrees(pEntityToUpdate.yRot - this.yRot);
+        pEntityToUpdate.setYBodyRot(this.getYRot());
+        float f = Mth.wrapDegrees(pEntityToUpdate.getYRot() - this.getYRot());
         float f1 = Mth.clamp(f, -105.0F, 105.0F);
         pEntityToUpdate.yRotO += f1 - f;
-        pEntityToUpdate.yRot += f1 - f;
-        pEntityToUpdate.setYHeadRot(pEntityToUpdate.yRot);
+        pEntityToUpdate.setYRot(pEntityToUpdate.getYRot() + f1 - f);
+        pEntityToUpdate.setYHeadRot(pEntityToUpdate.getYRot());
     }
 
     public void setPaddleState(boolean pLeft, boolean pRight, int vertical) {
@@ -638,9 +619,9 @@ public class SkyShipEntity extends Entity {
     protected void addPassenger(@Nonnull Entity passenger) {
         super.addPassenger(passenger);
         if (passenger instanceof Player && ((Player) passenger).isLocalPlayer()) {
-            passenger.yRotO = this.yRot;
-            passenger.yRot = this.yRot;
-            passenger.setYHeadRot(this.yRot);
+            passenger.yRotO = this.getYRot();
+            passenger.setYRot(this.getYRot());
+            passenger.setYHeadRot(this.getYRot());
         }
         if (this.isControlledByLocalInstance() && this.lerpSteps > 0) {
             this.lerpSteps = 0;
