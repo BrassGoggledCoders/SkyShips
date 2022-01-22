@@ -21,15 +21,17 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.parchmentmc.librarian.forgegradle'
 apply plugin: 'maven-publish'
 
+apply from: 'https://raw.githubusercontent.com/SizableShrimp/Forge-Class-Remapper/main/classremapper.gradle'
+
 version = '1.0.0'
 group = 'xyz.brassgoggledcoders.skyships' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'skyships'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8) // Mojang ships Java 8 to end users, so your mod should target Java 8.
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    mappings channel: 'parchment', version: '2021.10.17-1.16.5'
+    mappings channel: 'parchment', version: '2021.12.19-1.18.1'
 
     runs {
         client {
@@ -85,9 +87,9 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.5-36.2.19'
+    minecraft 'net.minecraftforge:forge:1.18.1-39.0.57'
 
-    def registrate = "com.tterrag.registrate:Registrate:MC1.16.5-1.0.10"
+    def registrate = "com.tterrag.registrate:Registrate:MC1.18-1.0.21"
     implementation fg.deobf(registrate)
     shade registrate
 }

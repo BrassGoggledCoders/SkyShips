@@ -1,7 +1,7 @@
 package xyz.brassgoggledcoders.skyships.network;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 import xyz.brassgoggledcoders.skyships.entity.SkyShipEntity;
 
@@ -18,7 +18,7 @@ public class UpdateSkyShipControlPacket {
         this.vertical = up;
     }
 
-    public void encode(PacketBuffer packetBuffer) {
+    public void encode(FriendlyByteBuf packetBuffer) {
         packetBuffer.writeBoolean(this.left);
         packetBuffer.writeBoolean(this.right);
         packetBuffer.writeInt(this.vertical);
@@ -26,7 +26,7 @@ public class UpdateSkyShipControlPacket {
 
     public boolean consume(Supplier<NetworkEvent.Context> contextSupplier) {
         contextSupplier.get().enqueueWork(() -> {
-            ServerPlayerEntity player = contextSupplier.get().getSender();
+            ServerPlayer player = contextSupplier.get().getSender();
             if (player != null && player.getVehicle() instanceof SkyShipEntity) {
                 ((SkyShipEntity) player.getVehicle()).setPaddleState(
                         left,
@@ -38,7 +38,7 @@ public class UpdateSkyShipControlPacket {
         return true;
     }
 
-    public static UpdateSkyShipControlPacket decode(PacketBuffer packetBuffer) {
+    public static UpdateSkyShipControlPacket decode(FriendlyByteBuf packetBuffer) {
         return new UpdateSkyShipControlPacket(
                 packetBuffer.readBoolean(),
                 packetBuffer.readBoolean(),

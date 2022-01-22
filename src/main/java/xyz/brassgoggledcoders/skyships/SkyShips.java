@@ -1,10 +1,10 @@
 package xyz.brassgoggledcoders.skyships;
 
 import com.tterrag.registrate.Registrate;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.fml.common.Mod;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsBlocks;
@@ -18,7 +18,7 @@ public class SkyShips {
     public static final String ID = "skyships";
 
     private static final Lazy<Registrate> REGISTRATE_LAZY = Lazy.of(() -> Registrate.create(ID)
-            .itemGroup(() -> new ItemGroup(ID) {
+            .itemGroup(() -> new CreativeModeTab(ID) {
                 @Override
                 @Nonnull
                 public ItemStack makeIcon() {

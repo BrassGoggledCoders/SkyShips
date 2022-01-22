@@ -1,12 +1,12 @@
 package xyz.brassgoggledcoders.skyships.blockentity;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.Direction;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.core.Direction;
 
-public class AeroporteControllerBlockEntity extends TileEntity {
-    public AeroporteControllerBlockEntity(TileEntityType<?> type) {
+public class AeroporteControllerBlockEntity extends BlockEntity {
+    public AeroporteControllerBlockEntity(BlockEntityType<?> type) {
         super(type);
     }
 

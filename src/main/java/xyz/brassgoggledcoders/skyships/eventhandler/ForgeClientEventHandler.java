@@ -1,8 +1,8 @@
 package xyz.brassgoggledcoders.skyships.eventhandler;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.util.MovementInput;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.player.Input;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
@@ -18,9 +18,9 @@ public class ForgeClientEventHandler {
     @SubscribeEvent
     public static void handlePaddleState(TickEvent.ClientTickEvent clientTickEvent) {
         if (clientTickEvent.phase == TickEvent.Phase.START && Minecraft.getInstance().player != null) {
-            ClientPlayerEntity player = Minecraft.getInstance().player;
+            LocalPlayer player = Minecraft.getInstance().player;
             if (player.getVehicle() instanceof SkyShipEntity) {
-                MovementInput input = player.input;
+                Input input = player.input;
                 ((SkyShipEntity) player.getVehicle()).setInput(
                         input.left,
                         input.right,
@@ -35,8 +35,8 @@ public class ForgeClientEventHandler {
     @SubscribeEvent
     public static void handleEnterShip(EntityMountEvent event) {
         if (event.isMounting() && event.getEntityBeingMounted() instanceof SkyShipEntity &&
-                event.getEntityMounting() instanceof ClientPlayerEntity) {
-            ClientPlayerEntity player = (ClientPlayerEntity) event.getEntityMounting();
+                event.getEntityMounting() instanceof LocalPlayer) {
+            LocalPlayer player = (LocalPlayer) event.getEntityMounting();
             SkyShipEntity shipEntity = (SkyShipEntity) event.getEntityBeingMounted();
 
             player.yRotO = shipEntity.yRot;

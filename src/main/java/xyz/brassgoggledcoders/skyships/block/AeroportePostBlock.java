@@ -1,31 +1,33 @@
 package xyz.brassgoggledcoders.skyships.block;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.state.BooleanProperty;
-import net.minecraft.state.EnumProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.Level;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsEntityTags;
 import xyz.brassgoggledcoders.skyships.entity.AeroporteHookEntity;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 
 public class AeroportePostBlock extends Block {
     public static final EnumProperty<Direction> HORIZONTAL_FACING = BlockStateProperties.HORIZONTAL_FACING;
@@ -39,13 +41,13 @@ public class AeroportePostBlock extends Block {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> stateBuilder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> stateBuilder) {
         stateBuilder.add(HORIZONTAL_FACING, WATERLOGGED);
     }
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(@Nonnull BlockItemUseContext context) {
+    public BlockState getStateForPlacement(@Nonnull BlockPlaceContext context) {
         FluidState fluidstate = context.getLevel().getFluidState(context.getClickedPos());
         return this.defaultBlockState()
                 .setValue(HORIZONTAL_FACING, context.getHorizontalDirection().getOpposite())
@@ -56,13 +58,13 @@ public class AeroportePostBlock extends Block {
     @Nonnull
     @SuppressWarnings("deprecation")
     @ParametersAreNonnullByDefault
-    public VoxelShape getShape(BlockState blockState, IBlockReader blockReader, BlockPos blockPos, ISelectionContext selectionContext) {
+    public VoxelShape getShape(BlockState blockState, BlockGetter blockReader, BlockPos blockPos, CollisionContext selectionContext) {
         return SHAPE;
     }
 
     @Override
     @ParametersAreNonnullByDefault
-    public boolean propagatesSkylightDown(BlockState pState, IBlockReader pReader, BlockPos pPos) {
+    public boolean propagatesSkylightDown(BlockState pState, BlockGetter pReader, BlockPos pPos) {
         return !pState.getValue(WATERLOGGED);
     }
 
@@ -70,7 +72,7 @@ public class AeroportePostBlock extends Block {
     @Nonnull
     @SuppressWarnings("deprecation")
     @ParametersAreNonnullByDefault
-    public BlockState updateShape(BlockState pState, Direction pFacing, BlockState pFacingState, IWorld pLevel, BlockPos pCurrentPos, BlockPos pFacingPos) {
+    public BlockState updateShape(BlockState pState, Direction pFacing, BlockState pFacingState, LevelAccessor pLevel, BlockPos pCurrentPos, BlockPos pFacingPos) {
         if (pState.getValue(WATERLOGGED)) {
             pLevel.getLiquidTicks().scheduleTick(pCurrentPos, Fluids.WATER, Fluids.WATER.getTickDelay(pLevel));
         }
@@ -86,16 +88,16 @@ public class AeroportePostBlock extends Block {
     }
 
     @Override
-    public BlockState rotate(BlockState state, IWorld world, BlockPos pos, Rotation direction) {
+    public BlockState rotate(BlockState state, LevelAccessor world, BlockPos pos, Rotation direction) {
         return state.setValue(HORIZONTAL_FACING, direction.rotate(state.getValue(HORIZONTAL_FACING)));
     }
 
     @Override
     @SuppressWarnings("deprecation")
     @ParametersAreNonnullByDefault
-    public void entityInside(BlockState blockState, World world, BlockPos blockPos, Entity entity) {
+    public void entityInside(BlockState blockState, Level world, BlockPos blockPos, Entity entity) {
         if (!(entity.getVehicle() instanceof AeroporteHookEntity) && entity.getType().is(SkyShipsEntityTags.DOCKABLE)) {
-            BlockPos.Mutable mutableDown = blockPos.mutable().move(Direction.DOWN);
+            BlockPos.MutableBlockPos mutableDown = blockPos.mutable().move(Direction.DOWN);
             BlockState below = world.getBlockState(mutableDown);
             Direction facing = blockState.getValue(HORIZONTAL_FACING);
             while (below.getBlock() instanceof AeroportePostBlock && below.getValue(HORIZONTAL_FACING) == facing) {
@@ -108,7 +110,7 @@ public class AeroportePostBlock extends Block {
     }
 
     @Override
-    public boolean isLadder(BlockState state, IWorldReader world, BlockPos pos, LivingEntity entity) {
+    public boolean isLadder(BlockState state, LevelReader world, BlockPos pos, LivingEntity entity) {
         return true;
     }
 }

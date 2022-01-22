@@ -1,32 +1,32 @@
 package xyz.brassgoggledcoders.skyships.entity;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.LilyPadBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.WaterlilyBlock;
 import net.minecraft.entity.*;
-import net.minecraft.entity.item.BoatEntity;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootParameterSets;
-import net.minecraft.loot.LootParameters;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.*;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.shapes.IBooleanFunction;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.fml.network.NetworkHooks;
 import xyz.brassgoggledcoders.skyships.SkyShips;
 
@@ -36,14 +36,28 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 import java.util.Objects;
 
+import net.minecraft.BlockUtil;
+import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.Pose;
+
 public class SkyShipEntity extends Entity {
-    private static final DataParameter<Integer> DATA_ID_HURT = EntityDataManager.defineId(SkyShipEntity.class, DataSerializers.INT);
-    private static final DataParameter<Integer> DATA_ID_HURT_DIR = EntityDataManager.defineId(SkyShipEntity.class, DataSerializers.INT);
-    private static final DataParameter<Float> DATA_ID_DAMAGE = EntityDataManager.defineId(SkyShipEntity.class, DataSerializers.FLOAT);
-    private static final DataParameter<Boolean> DATA_ID_PADDLE_LEFT = EntityDataManager.defineId(SkyShipEntity.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> DATA_ID_PADDLE_RIGHT = EntityDataManager.defineId(SkyShipEntity.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Integer> DATA_ID_BUBBLE_TIME = EntityDataManager.defineId(SkyShipEntity.class, DataSerializers.INT);
-    private static final DataParameter<Integer> DATA_ID_VERTICAL = EntityDataManager.defineId(SkyShipEntity.class, DataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_ID_HURT = SynchedEntityData.defineId(SkyShipEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_ID_HURT_DIR = SynchedEntityData.defineId(SkyShipEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Float> DATA_ID_DAMAGE = SynchedEntityData.defineId(SkyShipEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Boolean> DATA_ID_PADDLE_LEFT = SynchedEntityData.defineId(SkyShipEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> DATA_ID_PADDLE_RIGHT = SynchedEntityData.defineId(SkyShipEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> DATA_ID_BUBBLE_TIME = SynchedEntityData.defineId(SkyShipEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_ID_VERTICAL = SynchedEntityData.defineId(SkyShipEntity.class, EntityDataSerializers.INT);
 
     private final float[] paddlePositions = new float[2];
     private float outOfControlTicks;
@@ -69,7 +83,7 @@ public class SkyShipEntity extends Entity {
     private Status oldStatus;
     private double lastYd;
 
-    public SkyShipEntity(EntityType<?> type, World level) {
+    public SkyShipEntity(EntityType<?> type, Level level) {
         super(type, level);
     }
 
@@ -80,7 +94,7 @@ public class SkyShipEntity extends Entity {
 
     @Override
     @ParametersAreNonnullByDefault
-    protected float getEyeHeight(Pose pPos, EntitySize entitySize) {
+    protected float getEyeHeight(Pose pPos, EntityDimensions entitySize) {
         return entitySize.height;
     }
 
@@ -107,17 +121,17 @@ public class SkyShipEntity extends Entity {
     @Override
     @Nonnull
     @ParametersAreNonnullByDefault
-    public ActionResultType interact(PlayerEntity pPlayer, Hand pHand) {
+    public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
         if (pPlayer.isSecondaryUseActive()) {
-            return ActionResultType.PASS;
+            return InteractionResult.PASS;
         } else if (this.outOfControlTicks < 60.0F) {
             if (!this.level.isClientSide) {
-                return pPlayer.startRiding(this) ? ActionResultType.CONSUME : ActionResultType.PASS;
+                return pPlayer.startRiding(this) ? InteractionResult.CONSUME : InteractionResult.PASS;
             } else {
-                return ActionResultType.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
         } else {
-            return ActionResultType.PASS;
+            return InteractionResult.PASS;
         }
     }
 
@@ -134,7 +148,7 @@ public class SkyShipEntity extends Entity {
     @Override
     @Nonnull
     @ParametersAreNonnullByDefault
-    protected Vector3d getRelativePortalPosition(Direction.Axis axis, TeleportationRepositioner.Result result) {
+    protected Vec3 getRelativePortalPosition(Direction.Axis axis, BlockUtil.FoundRectangle result) {
         return LivingEntity.resetForwardDirectionOfRelativePortalPosition(super.getRelativePortalPosition(axis, result));
     }
 
@@ -152,7 +166,7 @@ public class SkyShipEntity extends Entity {
             this.setHurtTime(10);
             this.setDamage(this.getDamage() + pAmount * 10.0F);
             this.markHurt();
-            boolean flag = pSource.getEntity() instanceof PlayerEntity && ((PlayerEntity) pSource.getEntity()).abilities.instabuild;
+            boolean flag = pSource.getEntity() instanceof Player && ((Player) pSource.getEntity()).abilities.instabuild;
             if (flag || this.getDamage() > 40.0F) {
                 if (!flag && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
                     this.spawnLoot(pSource);
@@ -168,17 +182,17 @@ public class SkyShipEntity extends Entity {
     }
 
     private void spawnLoot(DamageSource pSource) {
-        if (this.level instanceof ServerWorld) {
-            ServerWorld serverLevel = (ServerWorld) this.level;
+        if (this.level instanceof ServerLevel) {
+            ServerLevel serverLevel = (ServerLevel) this.level;
 
             LootContext lootContext = new LootContext.Builder(serverLevel)
                     .withRandom(this.random)
-                    .withParameter(LootParameters.THIS_ENTITY, this)
-                    .withParameter(LootParameters.DAMAGE_SOURCE, pSource)
-                    .withParameter(LootParameters.ORIGIN, this.position())
-                    .withOptionalParameter(LootParameters.KILLER_ENTITY, pSource.getEntity())
-                    .withOptionalParameter(LootParameters.DIRECT_KILLER_ENTITY, pSource.getDirectEntity())
-                    .create(LootParameterSets.ENTITY);
+                    .withParameter(LootContextParams.THIS_ENTITY, this)
+                    .withParameter(LootContextParams.DAMAGE_SOURCE, pSource)
+                    .withParameter(LootContextParams.ORIGIN, this.position())
+                    .withOptionalParameter(LootContextParams.KILLER_ENTITY, pSource.getEntity())
+                    .withOptionalParameter(LootContextParams.DIRECT_KILLER_ENTITY, pSource.getDirectEntity())
+                    .create(LootContextParamSets.ENTITY);
 
             serverLevel.getServer()
                     .getLootTables()
@@ -190,7 +204,7 @@ public class SkyShipEntity extends Entity {
 
     @Override
     public void push(@Nonnull Entity pEntity) {
-        if (pEntity instanceof BoatEntity || pEntity instanceof SkyShipEntity) {
+        if (pEntity instanceof Boat || pEntity instanceof SkyShipEntity) {
             if (pEntity.getBoundingBox().minY < this.getBoundingBox().maxY) {
                 super.push(pEntity);
             }
@@ -246,7 +260,7 @@ public class SkyShipEntity extends Entity {
         super.tick();
         this.tickLerp();
         if (this.isControlledByLocalInstance()) {
-            if (this.getPassengers().isEmpty() || !(this.getPassengers().get(0) instanceof PlayerEntity)) {
+            if (this.getPassengers().isEmpty() || !(this.getPassengers().get(0) instanceof Player)) {
                 this.setPaddleState(false, false, 0);
             }
 
@@ -258,7 +272,7 @@ public class SkyShipEntity extends Entity {
 
             this.move(MoverType.SELF, this.getDeltaMovement());
         } else {
-            this.setDeltaMovement(Vector3d.ZERO);
+            this.setDeltaMovement(Vec3.ZERO);
         }
 
         for (int i = 0; i <= 1; ++i) {
@@ -266,7 +280,7 @@ public class SkyShipEntity extends Entity {
                 if (!this.isSilent() && (double) (this.paddlePositions[i] % ((float) Math.PI * 2F)) <= (double) ((float) Math.PI / 4F) && ((double) this.paddlePositions[i] + (double) ((float) Math.PI / 8F)) % (double) ((float) Math.PI * 2F) >= (double) ((float) Math.PI / 4F)) {
                     SoundEvent soundevent = this.getPaddleSound();
                     if (soundevent != null) {
-                        Vector3d vector3d = this.getViewVector(1.0F);
+                        Vec3 vector3d = this.getViewVector(1.0F);
                         double d0 = i == 1 ? -vector3d.z : vector3d.z;
                         double d1 = i == 1 ? vector3d.x : -vector3d.x;
                         this.level.playSound(null, this.getX() + d0, this.getY(), this.getZ() + d1, soundevent, this.getSoundSource(), 1.0F, 0.8F + 0.4F * this.random.nextFloat());
@@ -280,15 +294,15 @@ public class SkyShipEntity extends Entity {
         }
 
         this.checkInsideBlocks();
-        List<Entity> list = this.level.getEntities(this, this.getBoundingBox().inflate(0.2F, -0.01F, 0.2F), EntityPredicates.pushableBy(this));
+        List<Entity> list = this.level.getEntities(this, this.getBoundingBox().inflate(0.2F, -0.01F, 0.2F), EntitySelector.pushableBy(this));
         if (!list.isEmpty()) {
-            boolean flag = !this.level.isClientSide && !(this.getControllingPassenger() instanceof PlayerEntity);
+            boolean flag = !this.level.isClientSide && !(this.getControllingPassenger() instanceof Player);
 
             for (Entity entity : list) {
                 if (!entity.hasPassenger(this)) {
                     if (flag && this.getPassengers().size() < 2 && !entity.isPassenger() &&
                             entity.getBbWidth() < this.getBbWidth() && entity instanceof LivingEntity &&
-                            !(entity instanceof PlayerEntity)) {
+                            !(entity instanceof Player)) {
                         entity.startRiding(this);
                     } else {
                         this.push(entity);
@@ -323,16 +337,16 @@ public class SkyShipEntity extends Entity {
                 invFriction = 0.7F;
             } else if (this.status == Status.ON_LAND) {
                 invFriction = this.landFriction / 2;
-                if (this.getControllingPassenger() instanceof PlayerEntity) {
+                if (this.getControllingPassenger() instanceof Player) {
                     this.landFriction /= 2.0F;
                 }
             }
 
-            Vector3d vector3d = this.getDeltaMovement();
+            Vec3 vector3d = this.getDeltaMovement();
             this.setDeltaMovement(vector3d.x * (double) invFriction, vector3d.y + d1, vector3d.z * (double) invFriction);
             this.deltaRotation *= invFriction;
             if (d2 > 0.0D) {
-                Vector3d vector3d1 = this.getDeltaMovement();
+                Vec3 vector3d1 = this.getDeltaMovement();
                 this.setDeltaMovement(vector3d1.x, (vector3d1.y + d2 * 0.06153846016296973D) * 0.75D, vector3d1.z);
             }
         }
@@ -340,14 +354,14 @@ public class SkyShipEntity extends Entity {
     }
 
     public float getWaterLevelAbove() {
-        AxisAlignedBB axisalignedbb = this.getBoundingBox();
-        int i = MathHelper.floor(axisalignedbb.minX);
-        int j = MathHelper.ceil(axisalignedbb.maxX);
-        int k = MathHelper.floor(axisalignedbb.maxY);
-        int l = MathHelper.ceil(axisalignedbb.maxY - this.lastYd);
-        int i1 = MathHelper.floor(axisalignedbb.minZ);
-        int j1 = MathHelper.ceil(axisalignedbb.maxZ);
-        BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable();
+        AABB axisalignedbb = this.getBoundingBox();
+        int i = Mth.floor(axisalignedbb.minX);
+        int j = Mth.ceil(axisalignedbb.maxX);
+        int k = Mth.floor(axisalignedbb.maxY);
+        int l = Mth.ceil(axisalignedbb.maxY - this.lastYd);
+        int i1 = Mth.floor(axisalignedbb.minZ);
+        int j1 = Mth.ceil(axisalignedbb.maxZ);
+        BlockPos.MutableBlockPos blockpos$mutable = new BlockPos.MutableBlockPos();
 
         label39:
         for (int k1 = k; k1 < l; ++k1) {
@@ -395,18 +409,18 @@ public class SkyShipEntity extends Entity {
     }
 
     public float getGroundFriction() {
-        AxisAlignedBB boundingBox = this.getBoundingBox();
-        AxisAlignedBB groundBoundingBox = new AxisAlignedBB(boundingBox.minX, boundingBox.minY - 0.001D, boundingBox.minZ, boundingBox.maxX, boundingBox.minY, boundingBox.maxZ);
-        int i = MathHelper.floor(groundBoundingBox.minX) - 1;
-        int j = MathHelper.ceil(groundBoundingBox.maxX) + 1;
-        int k = MathHelper.floor(groundBoundingBox.minY) - 1;
-        int l = MathHelper.ceil(groundBoundingBox.maxY) + 1;
-        int i1 = MathHelper.floor(groundBoundingBox.minZ) - 1;
-        int j1 = MathHelper.ceil(groundBoundingBox.maxZ) + 1;
-        VoxelShape voxelshape = VoxelShapes.create(groundBoundingBox);
+        AABB boundingBox = this.getBoundingBox();
+        AABB groundBoundingBox = new AABB(boundingBox.minX, boundingBox.minY - 0.001D, boundingBox.minZ, boundingBox.maxX, boundingBox.minY, boundingBox.maxZ);
+        int i = Mth.floor(groundBoundingBox.minX) - 1;
+        int j = Mth.ceil(groundBoundingBox.maxX) + 1;
+        int k = Mth.floor(groundBoundingBox.minY) - 1;
+        int l = Mth.ceil(groundBoundingBox.maxY) + 1;
+        int i1 = Mth.floor(groundBoundingBox.minZ) - 1;
+        int j1 = Mth.ceil(groundBoundingBox.maxZ) + 1;
+        VoxelShape voxelshape = Shapes.create(groundBoundingBox);
         float f = 0.0F;
         int k1 = 0;
-        BlockPos.Mutable checkPosition = new BlockPos.Mutable();
+        BlockPos.MutableBlockPos checkPosition = new BlockPos.MutableBlockPos();
 
         for (int l1 = i; l1 < j; ++l1) {
             for (int i2 = i1; i2 < j1; ++i2) {
@@ -416,8 +430,8 @@ public class SkyShipEntity extends Entity {
                         if (j2 <= 0 || k2 != k && k2 != l - 1) {
                             checkPosition.set(l1, k2, i2);
                             BlockState blockstate = this.level.getBlockState(checkPosition);
-                            if (!(blockstate.getBlock() instanceof LilyPadBlock) &&
-                                    VoxelShapes.joinIsNotEmpty(blockstate.getCollisionShape(this.level, checkPosition).move(l1, k2, i2), voxelshape, IBooleanFunction.AND)) {
+                            if (!(blockstate.getBlock() instanceof WaterlilyBlock) &&
+                                    Shapes.joinIsNotEmpty(blockstate.getCollisionShape(this.level, checkPosition).move(l1, k2, i2), voxelshape, BooleanOp.AND)) {
                                 f += blockstate.getSlipperiness(this.level, checkPosition, this);
                                 ++k1;
                             }
@@ -431,16 +445,16 @@ public class SkyShipEntity extends Entity {
     }
 
     private boolean checkInWater() {
-        AxisAlignedBB axisalignedbb = this.getBoundingBox();
-        int i = MathHelper.floor(axisalignedbb.minX);
-        int j = MathHelper.ceil(axisalignedbb.maxX);
-        int k = MathHelper.floor(axisalignedbb.minY);
-        int l = MathHelper.ceil(axisalignedbb.minY + 0.001D);
-        int i1 = MathHelper.floor(axisalignedbb.minZ);
-        int j1 = MathHelper.ceil(axisalignedbb.maxZ);
+        AABB axisalignedbb = this.getBoundingBox();
+        int i = Mth.floor(axisalignedbb.minX);
+        int j = Mth.ceil(axisalignedbb.maxX);
+        int k = Mth.floor(axisalignedbb.minY);
+        int l = Mth.ceil(axisalignedbb.minY + 0.001D);
+        int i1 = Mth.floor(axisalignedbb.minZ);
+        int j1 = Mth.ceil(axisalignedbb.maxZ);
         boolean flag = false;
         this.waterLevel = Double.MIN_VALUE;
-        BlockPos.Mutable mutableBlockPos = new BlockPos.Mutable();
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
@@ -461,16 +475,16 @@ public class SkyShipEntity extends Entity {
 
     @Nullable
     private Status isUnderFluid() {
-        AxisAlignedBB axisalignedbb = this.getBoundingBox();
+        AABB axisalignedbb = this.getBoundingBox();
         double d0 = axisalignedbb.maxY + 0.001D;
-        int i = MathHelper.floor(axisalignedbb.minX);
-        int j = MathHelper.ceil(axisalignedbb.maxX);
-        int k = MathHelper.floor(axisalignedbb.maxY);
-        int l = MathHelper.ceil(d0);
-        int i1 = MathHelper.floor(axisalignedbb.minZ);
-        int j1 = MathHelper.ceil(axisalignedbb.maxZ);
+        int i = Mth.floor(axisalignedbb.minX);
+        int j = Mth.ceil(axisalignedbb.maxX);
+        int k = Mth.floor(axisalignedbb.maxY);
+        int l = Mth.ceil(d0);
+        int i1 = Mth.floor(axisalignedbb.minZ);
+        int j1 = Mth.ceil(axisalignedbb.maxZ);
         boolean flag = false;
-        BlockPos.Mutable mutablePos = new BlockPos.Mutable();
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
@@ -505,7 +519,7 @@ public class SkyShipEntity extends Entity {
             double d0 = this.getX() + (this.lerpX - this.getX()) / (double) this.lerpSteps;
             double d1 = this.getY() + (this.lerpY - this.getY()) / (double) this.lerpSteps;
             double d2 = this.getZ() + (this.lerpZ - this.getZ()) / (double) this.lerpSteps;
-            double d3 = MathHelper.wrapDegrees(this.lerpYRot - (double) this.yRot);
+            double d3 = Mth.wrapDegrees(this.lerpYRot - (double) this.yRot);
             this.yRot = (float) ((double) this.yRot + d3 / (double) this.lerpSteps);
             this.xRot = (float) ((double) this.xRot + (this.lerpXRot - (double) this.xRot) / (double) this.lerpSteps);
             --this.lerpSteps;
@@ -538,11 +552,11 @@ public class SkyShipEntity extends Entity {
                 f -= 0.005F;
             }
 
-            Vector3d vector3d = this.getDeltaMovement();
-            this.setDeltaMovement(new Vector3d(
-                    vector3d.x + MathHelper.sin(-this.yRot * ((float) Math.PI / 180F)) * f,
+            Vec3 vector3d = this.getDeltaMovement();
+            this.setDeltaMovement(new Vec3(
+                    vector3d.x + Mth.sin(-this.yRot * ((float) Math.PI / 180F)) * f,
                     this.inputVertical > 0 ? 0.05F : 0F,
-                    vector3d.z + MathHelper.cos(this.yRot * ((float) Math.PI / 180F)) * f)
+                    vector3d.z + Mth.cos(this.yRot * ((float) Math.PI / 180F)) * f)
             );
             this.setPaddleState(this.inputRight && !this.inputLeft || this.inputUp, this.inputLeft && !this.inputRight || this.inputUp, inputVertical);
         }
@@ -561,19 +575,19 @@ public class SkyShipEntity extends Entity {
                     f = -0.6F;
                 }
 
-                if (pPassenger instanceof AnimalEntity) {
+                if (pPassenger instanceof Animal) {
                     f = (float) ((double) f + 0.2D);
                 }
             }
 
-            Vector3d vector3d = (new Vector3d(f, 0.0D, 0.0D)).yRot(-this.yRot * ((float) Math.PI / 180F) - ((float) Math.PI / 2F));
+            Vec3 vector3d = (new Vec3(f, 0.0D, 0.0D)).yRot(-this.yRot * ((float) Math.PI / 180F) - ((float) Math.PI / 2F));
             pPassenger.setPos(this.getX() + vector3d.x, this.getY() + (double) f1, this.getZ() + vector3d.z);
             pPassenger.yRot += this.deltaRotation;
             pPassenger.setYHeadRot(pPassenger.getYHeadRot() + this.deltaRotation);
             this.clampRotation(pPassenger);
-            if (pPassenger instanceof AnimalEntity && this.getPassengers().size() > 1) {
+            if (pPassenger instanceof Animal && this.getPassengers().size() > 1) {
                 int j = pPassenger.getId() % 2 == 0 ? 90 : 270;
-                pPassenger.setYBodyRot(((AnimalEntity) pPassenger).yBodyRot + (float) j);
+                pPassenger.setYBodyRot(((Animal) pPassenger).yBodyRot + (float) j);
                 pPassenger.setYHeadRot(pPassenger.getYHeadRot() + (float) j);
             }
 
@@ -581,7 +595,7 @@ public class SkyShipEntity extends Entity {
     }
 
     public float getRowingTime(int pSide, float pLimbSwing) {
-        return this.getPaddleState(pSide) ? (float) MathHelper.clampedLerp((double) this.paddlePositions[pSide] - (double) ((float) Math.PI / 8F), this.paddlePositions[pSide], pLimbSwing) : 0.0F;
+        return this.getPaddleState(pSide) ? (float) Mth.clampedLerp((double) this.paddlePositions[pSide] - (double) ((float) Math.PI / 8F), this.paddlePositions[pSide], pLimbSwing) : 0.0F;
     }
 
     @Override
@@ -591,8 +605,8 @@ public class SkyShipEntity extends Entity {
 
     protected void clampRotation(Entity pEntityToUpdate) {
         pEntityToUpdate.setYBodyRot(this.yRot);
-        float f = MathHelper.wrapDegrees(pEntityToUpdate.yRot - this.yRot);
-        float f1 = MathHelper.clamp(f, -105.0F, 105.0F);
+        float f = Mth.wrapDegrees(pEntityToUpdate.yRot - this.yRot);
+        float f1 = Mth.clamp(f, -105.0F, 105.0F);
         pEntityToUpdate.yRotO += f1 - f;
         pEntityToUpdate.yRot += f1 - f;
         pEntityToUpdate.setYHeadRot(pEntityToUpdate.yRot);
@@ -605,25 +619,25 @@ public class SkyShipEntity extends Entity {
     }
 
     @Override
-    protected void readAdditionalSaveData(@Nonnull CompoundNBT pCompound) {
+    protected void readAdditionalSaveData(@Nonnull CompoundTag pCompound) {
 
     }
 
     @Override
-    protected void addAdditionalSaveData(@Nonnull CompoundNBT pCompound) {
+    protected void addAdditionalSaveData(@Nonnull CompoundTag pCompound) {
 
     }
 
     @Override
     @Nonnull
-    public IPacket<?> getAddEntityPacket() {
+    public Packet<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 
     @Override
     protected void addPassenger(@Nonnull Entity passenger) {
         super.addPassenger(passenger);
-        if (passenger instanceof PlayerEntity && ((PlayerEntity) passenger).isLocalPlayer()) {
+        if (passenger instanceof Player && ((Player) passenger).isLocalPlayer()) {
             passenger.yRotO = this.yRot;
             passenger.yRot = this.yRot;
             passenger.setYHeadRot(this.yRot);

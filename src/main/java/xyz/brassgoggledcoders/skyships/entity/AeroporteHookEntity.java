@@ -1,23 +1,23 @@
 package xyz.brassgoggledcoders.skyships.entity;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
 
 public class AeroporteHookEntity extends Entity {
-    private final DataParameter<BlockPos> CONTROLLER_POS = EntityDataManager.defineId(AeroporteHookEntity.class, DataSerializers.BLOCK_POS);
+    private final EntityDataAccessor<BlockPos> CONTROLLER_POS = SynchedEntityData.defineId(AeroporteHookEntity.class, EntityDataSerializers.BLOCK_POS);
 
-    public AeroporteHookEntity(EntityType<?> type, World world) {
+    public AeroporteHookEntity(EntityType<?> type, Level world) {
         super(type, world);
     }
 
@@ -27,18 +27,18 @@ public class AeroporteHookEntity extends Entity {
     }
 
     @Override
-    protected void readAdditionalSaveData(@Nonnull CompoundNBT pCompound) {
-        this.entityData.define(CONTROLLER_POS, NBTUtil.readBlockPos(pCompound.getCompound("controllerPos")));
+    protected void readAdditionalSaveData(@Nonnull CompoundTag pCompound) {
+        this.entityData.define(CONTROLLER_POS, NbtUtils.readBlockPos(pCompound.getCompound("controllerPos")));
     }
 
     @Override
-    protected void addAdditionalSaveData(@Nonnull CompoundNBT pCompound) {
-        pCompound.put("controllerPos", NBTUtil.writeBlockPos(this.entityData.get(CONTROLLER_POS)));
+    protected void addAdditionalSaveData(@Nonnull CompoundTag pCompound) {
+        pCompound.put("controllerPos", NbtUtils.writeBlockPos(this.entityData.get(CONTROLLER_POS)));
     }
 
     @Override
     @Nonnull
-    public IPacket<?> getAddEntityPacket() {
+    public Packet<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 
