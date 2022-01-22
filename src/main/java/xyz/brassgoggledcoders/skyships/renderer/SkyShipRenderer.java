@@ -51,7 +51,7 @@ public class SkyShipRenderer extends EntityRenderer<SkyShip> {
         }
 
         pMatrixStack.scale(-1.0F, -1.0F, 1.0F);
-        pMatrixStack.mulPose(Vector3f.YP.rotationDegrees(90.0F));
+        pMatrixStack.mulPose(Vector3f.YP.rotationDegrees(-90.0F));
 
         pMatrixStack.translate(0F, -1.5F, 0F);
         this.balloonModel.setupAnim(pEntity, pPartialTicks, 0.0F, -0.1F, 0.0F, 0.0F);
