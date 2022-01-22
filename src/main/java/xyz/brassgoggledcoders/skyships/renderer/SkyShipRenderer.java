@@ -2,30 +2,37 @@ package xyz.brassgoggledcoders.skyships.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
+import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import com.mojang.math.Vector3f;
 import xyz.brassgoggledcoders.skyships.SkyShips;
 import xyz.brassgoggledcoders.skyships.entity.SkyShip;
 
 import javax.annotation.Nonnull;
 
 public class SkyShipRenderer extends EntityRenderer<SkyShip> {
-    private static final ResourceLocation BALLOON_TEXTURE = SkyShips.rl("textures/entity/sky_ship_balloon.png");
-    private static final ResourceLocation STEERING_TEXTURE = SkyShips.rl("textures/entity/sky_ship_steering.png");
-    private static final ResourceLocation GONDOLA_TEXTURE = SkyShips.rl("textures/entity/sky_ship_gondola.png");
+    private static final ResourceLocation BALLOON_TEXTURE = SkyShips.rl("textures/entity/balloon_white.png");
+    private static final ResourceLocation STEERING_TEXTURE = SkyShips.rl("textures/entity/steering_oak.png");
+    private static final ResourceLocation GONDOLA_TEXTURE = SkyShips.rl("textures/entity/gondola_oak.png");
 
-    private final SkyShipSteeringModel<SkyShip> steeringModel = new SkyShipSteeringModel<>();
-    private final SkyShipBalloonModel<SkyShip> balloonModel = new SkyShipBalloonModel<>();
-    private final SkyShipGondolaModel<SkyShip> gondolaModel = new SkyShipGondolaModel<>();
+    public static final ModelLayerLocation BALLOON_LOCATION = new ModelLayerLocation(SkyShips.rl("balloon/white"), "main");
+    public static final ModelLayerLocation STEERING_LOCATION = new ModelLayerLocation(SkyShips.rl("steering/oak"), "main");
+    public static final ModelLayerLocation GONDOLA_LOCATION = new ModelLayerLocation(SkyShips.rl("gondola/oak"), "main");
+
+    private final BalloonModel<SkyShip> balloonModel;
+    private final SteeringModel<SkyShip> steeringModel;
+    private final GondolaModel<SkyShip> gondolaModel;
 
     public SkyShipRenderer(EntityRendererProvider.Context rendererManager) {
         super(rendererManager);
+        this.balloonModel = new BalloonModel<>(rendererManager.bakeLayer(BALLOON_LOCATION));
+        this.steeringModel = new SteeringModel<>(rendererManager.bakeLayer(STEERING_LOCATION));
+        this.gondolaModel = new GondolaModel<>(rendererManager.bakeLayer(GONDOLA_LOCATION));
     }
 
     @Override
