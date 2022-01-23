@@ -87,7 +87,7 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.18.1-39.0.57'
+    minecraft 'net.minecraftforge:forge:1.18.1-39.0.59'
 
     def registrate = "com.tterrag.registrate:Registrate:MC1.18-1.0.21"
     implementation fg.deobf(registrate)
