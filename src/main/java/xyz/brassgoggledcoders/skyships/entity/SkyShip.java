@@ -273,8 +273,6 @@ public class SkyShip extends Entity {
                 }
 
                 this.paddlePositions[i] = (float) ((double) this.paddlePositions[i] + (double) ((float) Math.PI / 8F));
-            } else {
-                this.paddlePositions[i] = 0.0F;
             }
         }
 
