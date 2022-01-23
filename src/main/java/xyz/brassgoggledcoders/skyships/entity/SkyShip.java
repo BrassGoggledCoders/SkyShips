@@ -599,6 +599,11 @@ public class SkyShip extends Entity {
         this.entityData.set(DATA_ID_VERTICAL, vertical);
     }
 
+    public float getRowingTime(int pSide, float pLimbSwing) {
+        //return this.getPaddleState(pSide) ? (float) Mth.lerp(pLimbSwing, this.paddlePositions[pSide], (double) this.paddlePositions[pSide] - (double) ((float) Math.PI / 8F)) : this.paddlePositions[pSide];
+        return (float) Mth.lerp(pLimbSwing, this.paddlePositions[pSide], (double) this.paddlePositions[pSide] - (double) ((float) Math.PI / 8F));
+    }
+
     @Override
     protected void readAdditionalSaveData(@Nonnull CompoundTag pCompound) {
 
