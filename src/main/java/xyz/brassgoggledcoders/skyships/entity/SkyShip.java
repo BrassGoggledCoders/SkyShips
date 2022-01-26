@@ -297,7 +297,7 @@ public class SkyShip extends Entity {
     }
 
     private void floatBoat() {
-        double d1 = this.entityData.get(DATA_ID_VERTICAL) > 0 ? 0.01D : this.isNoGravity() ? 0.0D : (double) -0.0004F;
+        double verticalAddition = this.entityData.get(DATA_ID_VERTICAL) > 0 ? 0.005D : this.isNoGravity() ? 0.0D : (double) -0.0004F;
         double d2 = 0.0D;
         float invFriction = 0.05F;
         if (this.oldStatus == Status.IN_AIR && this.status != Status.IN_AIR && this.status != Status.ON_LAND) {
@@ -311,7 +311,7 @@ public class SkyShip extends Entity {
                 d2 = (this.waterLevel - this.getY()) / (double) this.getBbHeight();
                 invFriction = 0.45F;
             } else if (this.status == Status.UNDER_FLOWING_FLUID) {
-                d1 = -7.0E-4D;
+                verticalAddition = -7.0E-4D;
                 invFriction = 0.45F;
             } else if (this.status == Status.UNDER_FLUID) {
                 d2 = 0.01F;
@@ -326,7 +326,7 @@ public class SkyShip extends Entity {
             }
 
             Vec3 vector3d = this.getDeltaMovement();
-            this.setDeltaMovement(vector3d.x * (double) invFriction, vector3d.y + d1, vector3d.z * (double) invFriction);
+            this.setDeltaMovement(vector3d.x * (double) invFriction, vector3d.y + verticalAddition, vector3d.z * (double) invFriction);
             this.deltaRotation *= invFriction;
             if (d2 > 0.0D) {
                 Vec3 vector3d1 = this.getDeltaMovement();
