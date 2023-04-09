@@ -34,6 +34,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.NetworkHooks;
 import xyz.brassgoggledcoders.skyships.SkyShips;
+import xyz.brassgoggledcoders.skyships.content.SkyShipsEntities;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -76,6 +77,11 @@ public class SkyShip extends Entity {
 
     public SkyShip(EntityType<?> type, Level level) {
         super(type, level);
+    }
+
+    public SkyShip(Level level, double x, double y, double z) {
+        super(SkyShipsEntities.SKY_SHIP.get(), level);
+        this.setPos(x, y, z);
     }
 
     @Override

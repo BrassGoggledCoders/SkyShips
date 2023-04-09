@@ -15,9 +15,9 @@ import xyz.brassgoggledcoders.skyships.renderer.SkyShipRenderer;
 public class SkyShipsEntities {
     public static EntityEntry<SkyShip> SKY_SHIP = SkyShips.getRegistrate()
             .object("sky_ship")
-            .entity(SkyShip::new, MobCategory.MISC)
+            .<SkyShip>entity(SkyShip::new, MobCategory.MISC)
             .properties(skyShipEntityBuilder -> skyShipEntityBuilder.clientTrackingRange(10)
-                    .sized(1.5f, 3f)
+                    .sized(1.75f, 4f)
             )
             .renderer(() -> SkyShipRenderer::new)
             .setData(ProviderType.LOOT, NonLivingEntityLootTables.loot(() -> LootTable.lootTable()
