@@ -19,7 +19,7 @@ public class NetworkHandler {
         this.channel.messageBuilder(UpdateSkyShipControlPacket.class, 0)
                 .encoder(UpdateSkyShipControlPacket::encode)
                 .decoder(UpdateSkyShipControlPacket::decode)
-                .consumer(UpdateSkyShipControlPacket::consume)
+                .consumerMainThread(UpdateSkyShipControlPacket::consume)
                 .add();
     }
 

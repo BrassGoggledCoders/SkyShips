@@ -24,18 +24,15 @@ public class UpdateSkyShipControlPacket {
         packetBuffer.writeInt(this.vertical);
     }
 
-    public boolean consume(Supplier<NetworkEvent.Context> contextSupplier) {
-        contextSupplier.get().enqueueWork(() -> {
-            ServerPlayer player = contextSupplier.get().getSender();
-            if (player != null && player.getVehicle() instanceof SkyShip) {
-                ((SkyShip) player.getVehicle()).setPaddleState(
-                        left,
-                        right,
-                        vertical
-                );
-            }
-        });
-        return true;
+    public void consume(Supplier<NetworkEvent.Context> contextSupplier) {
+        ServerPlayer player = contextSupplier.get().getSender();
+        if (player != null && player.getVehicle() instanceof SkyShip) {
+            ((SkyShip) player.getVehicle()).setPaddleState(
+                    left,
+                    right,
+                    vertical
+            );
+        }
     }
 
     public static UpdateSkyShipControlPacket decode(FriendlyByteBuf packetBuffer) {

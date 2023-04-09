@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[36,)"
+loaderVersion="[43,)"
 license="MIT"
 
 [[mods]] 
@@ -13,13 +13,13 @@ description='''
 [[dependencies.skyships]]
     modId="forge"
     mandatory=true
-    versionRange="[39.0.45,)"
+    versionRange="[43,)"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.skyships]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.18.1,1.19)"
+    versionRange="[1.19.2,1.20)"
     ordering="NONE"
     side="BOTH"

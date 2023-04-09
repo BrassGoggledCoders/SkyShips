@@ -2,15 +2,14 @@ package xyz.brassgoggledcoders.skyships.content;
 
 import com.tterrag.registrate.providers.RegistrateRecipeProvider;
 import com.tterrag.registrate.util.entry.BlockEntry;
+import net.minecraft.core.Direction;
+import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.data.recipes.ShapedRecipeBuilder;
-import net.minecraft.data.recipes.ShapelessRecipeBuilder;
-import net.minecraft.world.item.Items;
-import net.minecraft.core.Direction;
 import net.minecraftforge.common.Tags;
 import xyz.brassgoggledcoders.skyships.SkyShips;
 import xyz.brassgoggledcoders.skyships.block.AeroporteControllerBlock;
@@ -58,7 +57,6 @@ public class SkyShipsBlocks {
             .properties(properties -> properties.noOcclusion()
                     .sound(SoundType.WOOD)
             )
-            .addLayer(() -> RenderType::cutout)
             .blockstate((context, provider) -> provider.getMultipartBuilder(context.get())
                     .part()
                     .modelFile(provider.models().getExistingFile(provider.mcLoc("block/oak_fence_post")))

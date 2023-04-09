@@ -168,23 +168,7 @@ public class SkyShip extends Entity {
     }
 
     private void spawnLoot(DamageSource pSource) {
-        if (this.level instanceof ServerLevel serverLevel) {
-
-            LootContext lootContext = new LootContext.Builder(serverLevel)
-                    .withRandom(this.random)
-                    .withParameter(LootContextParams.THIS_ENTITY, this)
-                    .withParameter(LootContextParams.DAMAGE_SOURCE, pSource)
-                    .withParameter(LootContextParams.ORIGIN, this.position())
-                    .withOptionalParameter(LootContextParams.KILLER_ENTITY, pSource.getEntity())
-                    .withOptionalParameter(LootContextParams.DIRECT_KILLER_ENTITY, pSource.getDirectEntity())
-                    .create(LootContextParamSets.ENTITY);
-
-            serverLevel.getServer()
-                    .getLootTables()
-                    .get(Objects.requireNonNull(this.getType().getRegistryName()))
-                    .getRandomItems(lootContext)
-                    .forEach(this::spawnAtLocation);
-        }
+        //TODO LOOT
     }
 
     @Override
@@ -495,7 +479,7 @@ public class SkyShip extends Entity {
     private void tickLerp() {
         if (this.isControlledByLocalInstance()) {
             this.lerpSteps = 0;
-            this.setPacketCoordinates(this.getX(), this.getY(), this.getZ());
+            this.syncPacketPositionCodec(this.getX(), this.getY(), this.getZ());
         }
 
         if (this.lerpSteps > 0) {
