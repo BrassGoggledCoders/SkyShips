@@ -1,34 +1,32 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_the_recipe": {
-      "conditions": {
-        "recipe": "skyships:aeroporte_controller"
-      },
-      "trigger": "minecraft:recipe_unlocked"
-    },
-    "item": {
+    "has_item": {
       "conditions": {
         "items": [
           {
-            "items": [
-              "minecraft:chain"
-            ]
+            "tag": "minecraft:boats"
           }
         ]
       },
       "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "skyships:sky_ship"
+      },
+      "trigger": "minecraft:recipe_unlocked"
     }
   },
   "requirements": [
     [
-      "item",
+      "has_item",
       "has_the_recipe"
     ]
   ],
   "rewards": {
     "recipes": [
-      "skyships:aeroporte_controller"
+      "skyships:sky_ship"
     ]
   }
 }

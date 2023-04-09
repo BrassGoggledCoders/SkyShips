@@ -1,15 +1,21 @@
 package xyz.brassgoggledcoders.skyships;
 
 import com.tterrag.registrate.Registrate;
+import com.tterrag.registrate.providers.loot.RegistrateEntityLootTables;
+import com.tterrag.registrate.providers.loot.RegistrateLootTableProvider.LootType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.fml.common.Mod;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsBlocks;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsEntities;
+import xyz.brassgoggledcoders.skyships.content.SkyShipsItems;
+import xyz.brassgoggledcoders.skyships.item.SkyShipItem;
 import xyz.brassgoggledcoders.skyships.network.NetworkHandler;
+import xyz.brassgoggledcoders.skyships.registrate.NonLivingEntityLootTables;
 
 import javax.annotation.Nonnull;
 
@@ -27,12 +33,20 @@ public class SkyShips {
             }, "Sky Ships")
     );
 
+    public static final LootType<RegistrateEntityLootTables> NON_LIVING_ENTITY_LOOT_TYPE = LootType.register(
+            "non_living_entity",
+            LootContextParamSets.ENTITY,
+            NonLivingEntityLootTables::new
+    );
+
     public static NetworkHandler networkHandler;
 
     public SkyShips() {
         networkHandler = new NetworkHandler();
-        SkyShipsEntities.setup();
+
         SkyShipsBlocks.setup();
+        SkyShipsItems.setup();
+        SkyShipsEntities.setup();
     }
 
     public static Registrate getRegistrate() {

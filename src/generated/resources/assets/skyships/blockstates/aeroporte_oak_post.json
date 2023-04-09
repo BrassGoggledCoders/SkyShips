@@ -6,38 +6,38 @@
       }
     },
     {
-      "when": {
-        "facing": "north"
-      },
       "apply": {
         "model": "skyships:block/offset_chain"
+      },
+      "when": {
+        "facing": "north"
       }
     },
     {
-      "when": {
-        "facing": "south"
-      },
       "apply": {
         "model": "skyships:block/offset_chain",
         "y": 180
+      },
+      "when": {
+        "facing": "south"
       }
     },
     {
-      "when": {
-        "facing": "east"
-      },
       "apply": {
         "model": "skyships:block/offset_chain",
         "y": 90
+      },
+      "when": {
+        "facing": "east"
       }
     },
     {
-      "when": {
-        "facing": "west"
-      },
       "apply": {
         "model": "skyships:block/offset_chain",
         "y": 270
+      },
+      "when": {
+        "facing": "west"
       }
     }
   ]

@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": {
+      "tag": "minecraft:boats"
+    },
+    "S": {
+      "tag": "forge:string"
+    },
+    "W": {
+      "tag": "minecraft:wool"
+    }
+  },
+  "pattern": [
+    "WWW",
+    "S S",
+    " B "
+  ],
+  "result": {
+    "item": "skyships:sky_ship"
+  }
+}

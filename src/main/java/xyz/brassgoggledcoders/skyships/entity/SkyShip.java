@@ -168,7 +168,23 @@ public class SkyShip extends Entity {
     }
 
     private void spawnLoot(DamageSource pSource) {
-        //TODO LOOT
+        if (this.level instanceof ServerLevel serverLevel) {
+
+            LootContext lootContext = new LootContext.Builder(serverLevel)
+                    .withRandom(this.random)
+                    .withParameter(LootContextParams.THIS_ENTITY, this)
+                    .withParameter(LootContextParams.DAMAGE_SOURCE, pSource)
+                    .withParameter(LootContextParams.ORIGIN, this.position())
+                    .withOptionalParameter(LootContextParams.KILLER_ENTITY, pSource.getEntity())
+                    .withOptionalParameter(LootContextParams.DIRECT_KILLER_ENTITY, pSource.getDirectEntity())
+                    .create(LootContextParamSets.ENTITY);
+
+            serverLevel.getServer()
+                    .getLootTables()
+                    .get(this.getType().getDefaultLootTable())
+                    .getRandomItems(lootContext)
+                    .forEach(this::spawnAtLocation);
+        }
     }
 
     @Override
