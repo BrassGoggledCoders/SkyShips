@@ -1,6 +1,7 @@
 package xyz.brassgoggledcoders.skyships.content;
 
 import com.tterrag.registrate.providers.RegistrateRecipeProvider;
+import com.tterrag.registrate.util.entry.BlockEntityEntry;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import net.minecraft.core.Direction;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
@@ -44,10 +45,14 @@ public class SkyShipsBlocks {
                     .unlockedBy("item", RegistrateRecipeProvider.has(Items.CHAIN))
                     .save(provider)
             )
-            .blockEntity(AeroporteControllerBlockEntity::new)
-            .build()
             .item()
             .build()
+            .register();
+
+    public static BlockEntityEntry<AeroporteControllerBlockEntity> AEROPORTE_CONTROLLER_BLOCK_ENTITY = SkyShips.getRegistrate()
+            .object("aeroporte_controller")
+            .blockEntity(AeroporteControllerBlockEntity::new)
+            .validBlock(AEROPORTE_CONTROLLER)
             .register();
 
     public static BlockEntry<AeroportePostBlock> AEROPORTE_OAK_POST = SkyShips.getRegistrate()

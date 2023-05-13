@@ -10,7 +10,9 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkHooks;
+import xyz.brassgoggledcoders.skyships.content.SkyShipsEntities;
 
 import javax.annotation.Nonnull;
 
@@ -19,6 +21,11 @@ public class AeroporteHook extends Entity {
 
     public AeroporteHook(EntityType<?> type, Level world) {
         super(type, world);
+    }
+
+    public AeroporteHook(Level world, Vec3 position) {
+        this(SkyShipsEntities.AEROPORTE_HOOK.get(), world);
+        this.setPos(position);
     }
 
     @Override

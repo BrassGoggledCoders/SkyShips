@@ -7,8 +7,10 @@ import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import xyz.brassgoggledcoders.skyships.SkyShips;
+import xyz.brassgoggledcoders.skyships.entity.AeroporteHook;
 import xyz.brassgoggledcoders.skyships.entity.SkyShip;
 import xyz.brassgoggledcoders.skyships.registrate.NonLivingEntityLootTables;
+import xyz.brassgoggledcoders.skyships.renderer.AeroporteHookRenderer;
 import xyz.brassgoggledcoders.skyships.renderer.SkyShipRenderer;
 
 @SuppressWarnings("unused")
@@ -26,6 +28,15 @@ public class SkyShipsEntities {
                     )
             ))
             .tag(SkyShipsEntityTags.DOCKABLE)
+            .register();
+
+    public static EntityEntry<AeroporteHook> AEROPORTE_HOOK = SkyShips.getRegistrate()
+            .object("aeroporte_hook")
+            .<AeroporteHook>entity(AeroporteHook::new, MobCategory.MISC)
+            .properties(properties -> properties.clientTrackingRange(10)
+                    .sized(0.25F, 0.25F)
+            )
+            .renderer(() -> AeroporteHookRenderer::new)
             .register();
 
     public static void setup() {
