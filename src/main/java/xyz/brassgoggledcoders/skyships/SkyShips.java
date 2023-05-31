@@ -33,11 +33,11 @@ public class SkyShips {
             }, "Sky Ships")
     );
 
-    public static final LootType<RegistrateEntityLootTables> NON_LIVING_ENTITY_LOOT_TYPE = LootType.register(
+    public static final Lazy<LootType<RegistrateEntityLootTables>> NON_LIVING_ENTITY_LOOT_TYPE = Lazy.of(() -> LootType.register(
             "non_living_entity",
             LootContextParamSets.ENTITY,
             NonLivingEntityLootTables::new
-    );
+    ));
 
     public static NetworkHandler networkHandler;
 

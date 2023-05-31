@@ -28,7 +28,7 @@ public class NonLivingEntityLootTables extends RegistrateEntityLootTables {
             Supplier<LootTable.Builder> lootTable
     ) {
         return (context, provider) -> provider.addLootAction(
-                SkyShips.NON_LIVING_ENTITY_LOOT_TYPE,
+                SkyShips.NON_LIVING_ENTITY_LOOT_TYPE.get(),
                 tb -> tb.add(
                         context.get(),
                         lootTable.get()
