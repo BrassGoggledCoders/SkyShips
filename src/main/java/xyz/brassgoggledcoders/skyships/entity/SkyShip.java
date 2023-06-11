@@ -299,6 +299,14 @@ public class SkyShip extends Entity {
             }
         }
 
+        resetFall(this);
+    }
+
+    private void resetFall(Entity entity) {
+        entity.resetFallDistance();
+        for (Entity passenger: entity.getPassengers()) {
+            passenger.resetFallDistance();
+        }
     }
 
     private void floatBoat() {
