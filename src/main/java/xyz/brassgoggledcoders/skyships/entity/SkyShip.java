@@ -145,7 +145,7 @@ public class SkyShip extends Entity {
 
     @Override
     public double getPassengersRidingOffset() {
-        return -0.1D;
+        return 0.2D;
     }
 
     @Override
@@ -563,10 +563,12 @@ public class SkyShip extends Entity {
         if (this.hasPassenger(pPassenger)) {
             float f = 0.0F;
             float f1 = (float) ((!this.isAlive() ? (double) 0.01F : this.getPassengersRidingOffset()) + pPassenger.getMyRidingOffset());
-            if (this.getPassengers().size() > 1) {
+            if (this.getPassengers().size() == 1) {
+                f = 0.4F;
+            } else if (this.getPassengers().size() > 1) {
                 int i = this.getPassengers().indexOf(pPassenger);
                 if (i == 0) {
-                    f = 0.2F;
+                    f = 0.4F;
                 } else {
                     f = -0.6F;
                 }
