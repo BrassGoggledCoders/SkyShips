@@ -17,7 +17,7 @@ import xyz.brassgoggledcoders.skyships.content.SkyShipsEntities;
 import javax.annotation.Nonnull;
 
 public class AeroporteHook extends Entity {
-    private final EntityDataAccessor<BlockPos> CONTROLLER_POS = SynchedEntityData.defineId(AeroporteHook.class, EntityDataSerializers.BLOCK_POS);
+    private static final EntityDataAccessor<BlockPos> CONTROLLER_POS = SynchedEntityData.defineId(AeroporteHook.class, EntityDataSerializers.BLOCK_POS);
 
     public AeroporteHook(EntityType<?> type, Level world) {
         super(type, world);
