@@ -13,7 +13,6 @@ import net.minecraftforge.fml.common.Mod;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsBlocks;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsEntities;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsItems;
-import xyz.brassgoggledcoders.skyships.item.SkyShipItem;
 import xyz.brassgoggledcoders.skyships.network.NetworkHandler;
 import xyz.brassgoggledcoders.skyships.registrate.NonLivingEntityLootTables;
 
