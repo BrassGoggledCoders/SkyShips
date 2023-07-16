@@ -26,11 +26,11 @@ public class BalloonModel<T extends SkyShip> extends EntityModel<T> {
         PartDefinition balloon = partdefinition.addOrReplaceChild("balloon", CubeListBuilder.create().texOffs(0, 64).addBox(-16.0F, -57.0F, -16.0F, 32.0F, 32.0F, 32.0F, new CubeDeformation(0.0F))
                 .texOffs(0, 0).addBox(-16.0F, -57.0F, -16.0F, 32.0F, 32.0F, 32.0F, new CubeDeformation(0.25F)), PartPose.offset(0.0F, 24.0F, 0.0F));
 
-        PartDefinition cube_r1 = balloon.addOrReplaceChild("cube_r1", CubeListBuilder.create().texOffs(12, 0).addBox(23.5F, -12.5F, 0.0F, 2.0F, 25.0F, 0.0F, new CubeDeformation(0.0F))
-                .texOffs(8, 0).addBox(5.5F, -12.5F, 0.0F, 2.0F, 25.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-15.75F, -12.6759F, -13.0148F, 0.2618F, 0.0F, 0.0F));
+        PartDefinition leftLines = balloon.addOrReplaceChild("leftLines", CubeListBuilder.create().texOffs(12, 0).addBox(23.5F, -12.5F, 0.0F, 2.0F, 25.0F, 0.01F, new CubeDeformation(0.0F))
+                .texOffs(8, 0).addBox(5.5F, -12.5F, 0.0F, 2.0F, 25.0F, 0.01F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-15.75F, -12.6759F, -13.0148F, 0.2618F, 0.0F, 0.0F));
 
-        PartDefinition cube_r2 = balloon.addOrReplaceChild("cube_r2", CubeListBuilder.create().texOffs(4, 0).addBox(4.5F, -12.5F, 0.0F, 2.0F, 25.0F, 0.0F, new CubeDeformation(0.0F))
-                .texOffs(0, 0).addBox(-13.5F, -12.5F, 0.0F, 2.0F, 25.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(3.25F, -12.6762F, 13.0138F, -0.2618F, 0.0F, 0.0F));
+        PartDefinition rightLines = balloon.addOrReplaceChild("rightLines", CubeListBuilder.create().texOffs(4, 0).addBox(4.5F, -12.5F, 0.0F, 2.0F, 25.0F, 0.01F, new CubeDeformation(0.0F))
+                .texOffs(0, 0).addBox(-13.5F, -12.5F, 0.0F, 2.0F, 25.0F, 0.01F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(3.25F, -12.6762F, 13.0138F, -0.2618F, 0.0F, 0.0F));
 
         return LayerDefinition.create(meshdefinition, 128, 128);
     }

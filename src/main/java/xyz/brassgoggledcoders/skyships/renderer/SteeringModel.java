@@ -34,10 +34,9 @@ public class SteeringModel<T extends SkyShip> extends EntityModel<T> {
         PartDefinition rightPropeller = addons.addOrReplaceChild("rightPropeller", CubeListBuilder.create().texOffs(0, 6).mirror().addBox(-3.0F, -6.0F, -15.0F, 0.0F, 12.0F, 12.0F, new CubeDeformation(0.0F)).mirror(false)
                 .texOffs(0, 0).addBox(-4.0F, -1.0F, -10.0F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -3.0F, 12.0F, 2.5307F, 0.0F, 0.0F));
 
+        //Propeller Supports
         PartDefinition cube_r2 = addons.addOrReplaceChild("cube_r2", CubeListBuilder.create().texOffs(0, 0).addBox(-2.0F, -2.0F, -12.0F, 4.0F, 4.0F, 14.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -3.0F, 12.0F, 2.5307F, 0.0F, 0.0F));
-
         PartDefinition cube_r3 = addons.addOrReplaceChild("cube_r3", CubeListBuilder.create().texOffs(22, 0).addBox(3.5F, -6.0F, 0.0F, 8.0F, 12.0F, 0.0F, new CubeDeformation(0.01F)), PartPose.offset(20.7291F, -0.4851F, 0.0F));
-
         PartDefinition cube_r4 = addons.addOrReplaceChild("cube_r4", CubeListBuilder.create().texOffs(0, 0).addBox(-2.0F, -2.0F, -12.0F, 4.0F, 4.0F, 14.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -3.0F, -12.0F, 0.6109F, 0.0F, 0.0F));
 
         PartDefinition leftPropeller = addons.addOrReplaceChild("leftPropeller", CubeListBuilder.create().texOffs(0, 6).addBox(-3.0F, -6.0F, -15.0F, 0.0F, 12.0F, 12.0F, new CubeDeformation(0.0F))
