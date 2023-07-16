@@ -90,8 +90,7 @@ dependencies {
 
     implementation fg.deobf("com.tterrag.registrate:Registrate:MC1.19-1.1.5")
     jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "MC1.19-1.1.5") {
-        jarJar.pin(it, "MC1.19-1.1.5")
-        jarJar.ranged(it, "[MC1.19,MC1.19.3)")
+        jarJar.ranged(it, "[MC1.1901.1.5,MC1.19.3)")
     }
 }
 
