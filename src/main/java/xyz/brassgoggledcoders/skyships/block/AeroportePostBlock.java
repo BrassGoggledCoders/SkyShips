@@ -1,28 +1,28 @@
 package xyz.brassgoggledcoders.skyships.block;
 
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.ticks.ScheduledTick;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsEntityTags;
 import xyz.brassgoggledcoders.skyships.entity.AeroporteHook;
+import xyz.brassgoggledcoders.skyships.util.BlockHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -48,8 +48,20 @@ public class AeroportePostBlock extends Block {
     @Override
     public BlockState getStateForPlacement(@Nonnull BlockPlaceContext context) {
         FluidState fluidstate = context.getLevel().getFluidState(context.getClickedPos());
+
+        Direction facing = context.getHorizontalDirection().getOpposite();
+        BlockState placedOn = context.getLevel()
+                .getBlockState(context.getClickedPos()
+                        .relative(context.getClickedFace()
+                                .getOpposite()
+                        )
+                );
+        if (placedOn.hasProperty(HORIZONTAL_FACING)) {
+            facing = placedOn.getValue(HORIZONTAL_FACING);
+        }
+
         return this.defaultBlockState()
-                .setValue(HORIZONTAL_FACING, context.getHorizontalDirection().getOpposite())
+                .setValue(HORIZONTAL_FACING, facing)
                 .setValue(WATERLOGGED, fluidstate.getType() == Fluids.WATER);
     }
 
@@ -94,16 +106,16 @@ public class AeroportePostBlock extends Block {
     @Override
     @SuppressWarnings("deprecation")
     @ParametersAreNonnullByDefault
-    public void entityInside(BlockState blockState, Level world, BlockPos blockPos, Entity entity) {
+    public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
         if (!(entity.getVehicle() instanceof AeroporteHook) && entity.getType().is(SkyShipsEntityTags.DOCKABLE)) {
-            BlockPos.MutableBlockPos mutableDown = blockPos.mutable().move(Direction.DOWN);
-            BlockState below = world.getBlockState(mutableDown);
-            Direction facing = blockState.getValue(HORIZONTAL_FACING);
-            while (below.getBlock() instanceof AeroportePostBlock && below.getValue(HORIZONTAL_FACING) == facing) {
-                below = world.getBlockState(mutableDown.move(Direction.DOWN));
-            }
-            if (below.getBlock() instanceof AeroporteControllerBlock) {
-                ((AeroporteControllerBlock) below.getBlock()).handleDockingShip(entity, world, mutableDown, facing);
+            BlockPos furthestDown = BlockHelper.findFurthest(blockPos, level, Direction.DOWN, testState -> testState == blockState);
+            if (level.getBlockState(furthestDown).getBlock() instanceof AeroporteControllerBlock aeroporteControllerBlock) {
+                aeroporteControllerBlock.handleDockingShip(entity, level, furthestDown, Direction.DOWN);
+            } else {
+                BlockPos furthestUp = BlockHelper.findFurthest(blockPos, level, Direction.UP, testState -> testState == blockState);
+                if (level.getBlockState(furthestUp).getBlock() instanceof AeroporteControllerBlock aeroporteControllerBlock) {
+                    aeroporteControllerBlock.handleDockingShip(entity, level, furthestUp, Direction.UP);
+                }
             }
         }
     }

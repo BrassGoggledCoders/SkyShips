@@ -36,6 +36,7 @@ public class SkyShipsEntities {
             .properties(properties -> properties.clientTrackingRange(10)
                     .sized(0.25F, 0.25F)
             )
+            .setData(ProviderType.LOOT, NonLivingEntityLootTables.loot(LootTable::lootTable))
             .renderer(() -> AeroporteHookRenderer::new)
             .register();
 

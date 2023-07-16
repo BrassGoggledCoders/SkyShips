@@ -1,6 +1,7 @@
 {
   "block.skyships.aeroporte_controller": "Aeroporte Controller",
   "block.skyships.aeroporte_oak_post": "Aeroporte Oak Post",
+  "entity.skyships.aeroporte_hook": "Aeroporte Hook",
   "entity.skyships.sky_ship": "Sky Ship",
   "item.skyships.sky_ship": "Sky Ship",
   "itemGroup.skyships": "Sky Ships"

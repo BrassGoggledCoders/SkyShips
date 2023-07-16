@@ -93,9 +93,11 @@ public class SkyShipsBlocks {
             )
             .item()
             .model((context, provider) -> provider.withExistingParent(
-                    "item/aeroporte_oak_post",
-                    provider.mcLoc("block/oak_fence_post")
-            ))
+                                    "item/aeroporte_oak_post",
+                                    provider.mcLoc("block/fence_post")
+                            )
+                            .texture("texture", provider.mcLoc("block/oak_planks"))
+            )
             .recipe((context, provider) -> ShapelessRecipeBuilder.shapeless(context.get())
                     .requires(Items.OAK_FENCE)
                     .requires(Items.CHAIN)
