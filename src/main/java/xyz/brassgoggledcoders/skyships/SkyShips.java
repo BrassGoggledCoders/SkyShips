@@ -10,7 +10,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.fml.common.Mod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsBlocks;
+import xyz.brassgoggledcoders.skyships.content.SkyShipsEngines;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsEntities;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsItems;
 import xyz.brassgoggledcoders.skyships.network.NetworkHandler;
@@ -21,6 +24,7 @@ import javax.annotation.Nonnull;
 @Mod(SkyShips.ID)
 public class SkyShips {
     public static final String ID = "skyships";
+    public static final Logger LOGGER = LoggerFactory.getLogger(ID);
 
     private static final Lazy<Registrate> REGISTRATE_LAZY = Lazy.of(() -> Registrate.create(ID)
             .creativeModeTab(() -> new CreativeModeTab(ID) {
@@ -44,6 +48,7 @@ public class SkyShips {
         networkHandler = new NetworkHandler();
 
         SkyShipsBlocks.setup();
+        SkyShipsEngines.setup();
         SkyShipsItems.setup();
         SkyShipsEntities.setup();
     }

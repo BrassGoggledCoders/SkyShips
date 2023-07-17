@@ -6,6 +6,7 @@ import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -38,7 +39,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 import xyz.brassgoggledcoders.skyships.SkyShips;
+import xyz.brassgoggledcoders.skyships.content.SkyShipsEngines;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsEntities;
+import xyz.brassgoggledcoders.skyships.engine.Engine;
+import xyz.brassgoggledcoders.skyships.engine.ManualEngine;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -85,12 +89,15 @@ public class SkyShip extends Entity {
     private SkyShipStatus oldStatus;
     private double lastYd;
 
+    private Engine engine;
+
     public SkyShip(EntityType<?> type, Level level) {
         super(type, level);
+        this.engine = new ManualEngine();
     }
 
     public SkyShip(Level level, double x, double y, double z) {
-        super(SkyShipsEntities.SKY_SHIP.get(), level);
+        this(SkyShipsEntities.SKY_SHIP.get(), level);
         this.setPos(x, y, z);
     }
 
@@ -260,15 +267,11 @@ public class SkyShip extends Entity {
 
         super.tick();
         this.tickLerp();
-        if (this.isControlledByLocalInstance()) {
-            if (this.getPassengers().isEmpty() || !(this.getPassengers().get(0) instanceof Player)) {
-                this.setPaddleState(false, false, 0);
-            }
+        this.engine.tick(this);
 
-            this.floatBoat();
-            if (this.level.isClientSide) {
-                this.controlBoat();
-                SkyShips.networkHandler.updateSkyShipControl(this.getPaddleState(0), this.getPaddleState(1), this.inputVertical);
+        if (this.isControlledByLocalInstance()) {
+            if (this.engine.canRun(this)) {
+                this.engine.maneuver(this);
             }
 
             this.move(MoverType.SELF, this.getDeltaMovement());
@@ -320,7 +323,7 @@ public class SkyShip extends Entity {
         }
     }
 
-    private void floatBoat() {
+    public void floatBoat() {
         double verticalAddition = this.entityData.get(DATA_ID_VERTICAL) > 0 ? 0.015D : this.isNoGravity() ? 0.0D : (double) -0.0004F;
         double d2 = 0.0D;
         float invFriction = 0.05F;
@@ -361,13 +364,13 @@ public class SkyShip extends Entity {
     }
 
     public float getWaterLevelAbove() {
-        AABB axisalignedbb = this.getBoundingBox();
-        int i = Mth.floor(axisalignedbb.minX);
-        int j = Mth.ceil(axisalignedbb.maxX);
-        int k = Mth.floor(axisalignedbb.maxY);
-        int l = Mth.ceil(axisalignedbb.maxY - this.lastYd);
-        int i1 = Mth.floor(axisalignedbb.minZ);
-        int j1 = Mth.ceil(axisalignedbb.maxZ);
+        AABB boundingBox = this.getBoundingBox();
+        int i = Mth.floor(boundingBox.minX);
+        int j = Mth.ceil(boundingBox.maxX);
+        int k = Mth.floor(boundingBox.maxY);
+        int l = Mth.ceil(boundingBox.maxY - this.lastYd);
+        int i1 = Mth.floor(boundingBox.minZ);
+        int j1 = Mth.ceil(boundingBox.maxZ);
         BlockPos.MutableBlockPos blockpos$mutable = new BlockPos.MutableBlockPos();
 
         label39:
@@ -535,7 +538,7 @@ public class SkyShip extends Entity {
         }
     }
 
-    private void controlBoat() {
+    public void controlBoat() {
         if (this.isVehicle()) {
             float f = 0.0F;
             if (this.inputLeft) {
@@ -631,12 +634,18 @@ public class SkyShip extends Entity {
 
     @Override
     protected void readAdditionalSaveData(@Nonnull CompoundTag pCompound) {
-
+        this.engine = SkyShipsEngines.CODEC.decode(NbtOps.INSTANCE, pCompound.get("Engine"))
+                .getOrThrow(true, error -> SkyShips.LOGGER.error("Failed to decode engine: {}", error))
+                .getFirst();
     }
 
     @Override
     protected void addAdditionalSaveData(@Nonnull CompoundTag pCompound) {
-
+        pCompound.put(
+                "Engine",
+                SkyShipsEngines.CODEC.encode(this.engine, NbtOps.INSTANCE, NbtOps.INSTANCE.empty())
+                        .getOrThrow(true, error -> SkyShips.LOGGER.error("Failed to encode engine: {}", error))
+        );
     }
 
     @Override
@@ -759,5 +768,9 @@ public class SkyShip extends Entity {
 
         }
         return super.getDismountLocationForPassenger(pLivingEntity);
+    }
+
+    public int getInputVertical() {
+        return inputVertical;
     }
 }
