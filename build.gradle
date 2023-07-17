@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'xyz.brassgoggledcoders'
-version = '0.1.2'
+version = '0.2.0'
 
 java {
     archivesBaseName = 'SkyShips'
@@ -90,7 +90,7 @@ dependencies {
 
     implementation fg.deobf("com.tterrag.registrate:Registrate:MC1.19-1.1.5")
     jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "MC1.19-1.1.5") {
-        jarJar.ranged(it, "[MC1.1901.1.5,MC1.19.3)")
+        jarJar.ranged(it, "[MC1.19-1.1.5,MC1.19.3)")
     }
 }
 
