@@ -1,5 +1,7 @@
 package xyz.brassgoggledcoders.skyships.entity;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,6 +21,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.WaterlilyBlock;
@@ -33,6 +36,7 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.NetworkHooks;
+import org.jetbrains.annotations.NotNull;
 import xyz.brassgoggledcoders.skyships.SkyShips;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsEntities;
 
@@ -40,8 +44,15 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
+import java.util.Objects;
 
 public class SkyShip extends Entity {
+    private static final ImmutableMap<Pose, ImmutableList<Integer>> POSE_DISMOUNT_HEIGHTS = ImmutableMap.of(
+            Pose.STANDING, ImmutableList.of(0, 1, -1),
+            Pose.CROUCHING, ImmutableList.of(0, 1, -1),
+            Pose.SWIMMING, ImmutableList.of(0, 1)
+    );
+
     private static final EntityDataAccessor<Integer> DATA_ID_HURT = SynchedEntityData.defineId(SkyShip.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_ID_HURT_DIR = SynchedEntityData.defineId(SkyShip.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Float> DATA_ID_DAMAGE = SynchedEntityData.defineId(SkyShip.class, EntityDataSerializers.FLOAT);
@@ -70,8 +81,8 @@ public class SkyShip extends Entity {
     private double waterLevel;
     private float landFriction;
 
-    private Status status;
-    private Status oldStatus;
+    private SkyShipStatus status;
+    private SkyShipStatus oldStatus;
     private double lastYd;
 
     public SkyShip(EntityType<?> type, Level level) {
@@ -229,7 +240,7 @@ public class SkyShip extends Entity {
     public void tick() {
         this.oldStatus = this.status;
         this.status = this.getStatus();
-        if (this.status != Status.UNDER_FLUID && this.status != Status.UNDER_FLOWING_FLUID) {
+        if (this.status != SkyShipStatus.UNDER_FLUID && this.status != SkyShipStatus.UNDER_FLOWING_FLUID) {
             this.outOfControlTicks = 0.0F;
         } else {
             ++this.outOfControlTicks;
@@ -304,7 +315,7 @@ public class SkyShip extends Entity {
 
     private void resetFall(Entity entity) {
         entity.resetFallDistance();
-        for (Entity passenger: entity.getPassengers()) {
+        for (Entity passenger : entity.getPassengers()) {
             passenger.resetFallDistance();
         }
     }
@@ -313,25 +324,25 @@ public class SkyShip extends Entity {
         double verticalAddition = this.entityData.get(DATA_ID_VERTICAL) > 0 ? 0.015D : this.isNoGravity() ? 0.0D : (double) -0.0004F;
         double d2 = 0.0D;
         float invFriction = 0.05F;
-        if (this.oldStatus == Status.IN_AIR && this.status != Status.IN_AIR && this.status != Status.ON_LAND) {
+        if (this.oldStatus == SkyShipStatus.IN_AIR && this.status != SkyShipStatus.IN_AIR && this.status != SkyShipStatus.ON_LAND) {
             this.waterLevel = this.getY(1.0D);
             this.setPos(this.getX(), (double) (this.getWaterLevelAbove() - this.getBbHeight()) + 0.101D, this.getZ());
             this.setDeltaMovement(this.getDeltaMovement().multiply(1.0D, 0.0D, 1.0D));
             this.lastYd = 0.0D;
-            this.status = Status.IN_FLUID;
+            this.status = SkyShipStatus.IN_FLUID;
         } else {
-            if (this.status == Status.IN_FLUID) {
+            if (this.status == SkyShipStatus.IN_FLUID) {
                 d2 = (this.waterLevel - this.getY()) / (double) this.getBbHeight();
                 invFriction = 0.45F;
-            } else if (this.status == Status.UNDER_FLOWING_FLUID) {
+            } else if (this.status == SkyShipStatus.UNDER_FLOWING_FLUID) {
                 verticalAddition = -7.0E-4D;
                 invFriction = 0.45F;
-            } else if (this.status == Status.UNDER_FLUID) {
+            } else if (this.status == SkyShipStatus.UNDER_FLUID) {
                 d2 = 0.01F;
                 invFriction = 0.25F;
-            } else if (this.status == Status.IN_AIR) {
+            } else if (this.status == SkyShipStatus.IN_AIR) {
                 invFriction = 0.7F;
-            } else if (this.status == Status.ON_LAND) {
+            } else if (this.status == SkyShipStatus.ON_LAND) {
                 invFriction = this.landFriction / 2;
                 if (this.getControllingPassenger() instanceof Player) {
                     this.landFriction /= 2.0F;
@@ -386,20 +397,20 @@ public class SkyShip extends Entity {
     }
 
 
-    protected Status getStatus() {
-        Status status = this.isUnderFluid();
+    protected SkyShipStatus getStatus() {
+        SkyShipStatus status = this.isUnderFluid();
         if (status != null) {
             this.waterLevel = this.getBoundingBox().maxY;
             return status;
         } else if (this.checkInWater()) {
-            return Status.IN_FLUID;
+            return SkyShipStatus.IN_FLUID;
         } else {
             float f = this.getGroundFriction();
             if (f > 0.0F) {
                 this.landFriction = f;
-                return Status.ON_LAND;
+                return SkyShipStatus.ON_LAND;
             } else {
-                return Status.IN_AIR;
+                return SkyShipStatus.IN_AIR;
             }
         }
     }
@@ -470,7 +481,7 @@ public class SkyShip extends Entity {
     }
 
     @Nullable
-    private Status isUnderFluid() {
+    private SkyShipStatus isUnderFluid() {
         AABB axisalignedbb = this.getBoundingBox();
         double d0 = axisalignedbb.maxY + 0.001D;
         int i = Mth.floor(axisalignedbb.minX);
@@ -489,7 +500,7 @@ public class SkyShip extends Entity {
                     FluidState fluidstate = this.level.getFluidState(mutablePos);
                     if (d0 < (double) ((float) mutablePos.getY() + fluidstate.getHeight(this.level, mutablePos))) {
                         if (!fluidstate.isSource()) {
-                            return Status.UNDER_FLOWING_FLUID;
+                            return SkyShipStatus.UNDER_FLOWING_FLUID;
                         }
 
                         flag = true;
@@ -498,7 +509,7 @@ public class SkyShip extends Entity {
             }
         }
 
-        return flag ? Status.UNDER_FLUID : null;
+        return flag ? SkyShipStatus.UNDER_FLUID : null;
     }
 
     protected SoundEvent getPaddleSound() {
@@ -612,6 +623,7 @@ public class SkyShip extends Entity {
         this.entityData.set(DATA_ID_VERTICAL, vertical);
     }
 
+    @SuppressWarnings("unused")
     public float getRowingTime(int pSide, float pLimbSwing) {
         //return this.getPaddleState(pSide) ? (float) Mth.lerp(pLimbSwing, this.paddlePositions[pSide], (double) this.paddlePositions[pSide] - (double) ((float) Math.PI / 8F)) : this.paddlePositions[pSide];
         return (float) Mth.lerp(pLimbSwing, this.paddlePositions[pSide], (double) this.paddlePositions[pSide] - (double) ((float) Math.PI / 8F));
@@ -694,11 +706,58 @@ public class SkyShip extends Entity {
         return this.entityData.get(DATA_ID_HURT_DIR);
     }
 
-    public enum Status {
-        IN_FLUID,
-        UNDER_FLUID,
-        UNDER_FLOWING_FLUID,
-        ON_LAND,
-        IN_AIR
+    //Pulled from AbstractMinecart
+    @Override
+    @NotNull
+    public Vec3 getDismountLocationForPassenger(@NotNull LivingEntity pLivingEntity) {
+        Direction direction = this.getMotionDirection();
+        if (direction.getAxis() != Direction.Axis.Y) {
+            int[][] offsetsForDirection = DismountHelper.offsetsForDirection(direction);
+            BlockPos blockpos = this.blockPosition();
+            BlockPos.MutableBlockPos possibleDismountPos = new BlockPos.MutableBlockPos();
+            ImmutableList<Pose> dismountPoses = pLivingEntity.getDismountPoses();
+
+            for (Pose pose : dismountPoses) {
+                EntityDimensions entitydimensions = pLivingEntity.getDimensions(pose);
+                float f = Math.min(entitydimensions.width, 1.0F) / 2.0F;
+
+                for (int i : Objects.requireNonNull(POSE_DISMOUNT_HEIGHTS.get(pose))) {
+                    for (int[] aint1 : offsetsForDirection) {
+                        possibleDismountPos.set(blockpos.getX() + aint1[0], blockpos.getY() + i, blockpos.getZ() + aint1[1]);
+                        double d0 = this.level.getBlockFloorHeight(
+                                DismountHelper.nonClimbableShape(this.level, possibleDismountPos),
+                                () -> DismountHelper.nonClimbableShape(this.level, possibleDismountPos.below())
+                        );
+                        if (DismountHelper.isBlockFloorValid(d0)) {
+                            AABB aabb = new AABB(-f, 0.0D, -f, f, entitydimensions.height, f);
+                            Vec3 vec3 = Vec3.upFromBottomCenterOf(possibleDismountPos, d0);
+                            if (DismountHelper.canDismountTo(this.level, pLivingEntity, aabb.move(vec3))) {
+                                pLivingEntity.setPose(pose);
+                                return vec3;
+                            }
+                        }
+                    }
+                }
+            }
+
+            double d1 = this.getBoundingBox().maxY;
+            possibleDismountPos.set(blockpos.getX(), d1, blockpos.getZ());
+
+            for (Pose dismountPose : dismountPoses) {
+                double height = pLivingEntity.getDimensions(dismountPose).height;
+                int roundedHeight = Mth.ceil(d1 - (double) possibleDismountPos.getY() + height);
+                double ceilingPos = DismountHelper.findCeilingFrom(
+                        possibleDismountPos,
+                        roundedHeight,
+                        (collisionPos) -> this.level.getBlockState(collisionPos).getCollisionShape(this.level, collisionPos)
+                );
+                if (d1 + height <= ceilingPos) {
+                    pLivingEntity.setPose(dismountPose);
+                    break;
+                }
+            }
+
+        }
+        return super.getDismountLocationForPassenger(pLivingEntity);
     }
 }
