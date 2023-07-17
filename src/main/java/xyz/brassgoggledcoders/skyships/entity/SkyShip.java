@@ -721,9 +721,9 @@ public class SkyShip extends Entity {
                 EntityDimensions entitydimensions = pLivingEntity.getDimensions(pose);
                 float f = Math.min(entitydimensions.width, 1.0F) / 2.0F;
 
-                for (int i : Objects.requireNonNull(POSE_DISMOUNT_HEIGHTS.get(pose))) {
-                    for (int[] aint1 : offsetsForDirection) {
-                        possibleDismountPos.set(blockpos.getX() + aint1[0], blockpos.getY() + i, blockpos.getZ() + aint1[1]);
+                for (int height : Objects.requireNonNull(POSE_DISMOUNT_HEIGHTS.get(pose))) {
+                    for (int[] offsets : offsetsForDirection) {
+                        possibleDismountPos.set(blockpos.getX() + offsets[0], blockpos.getY() + height, blockpos.getZ() + offsets[1]);
                         double d0 = this.level.getBlockFloorHeight(
                                 DismountHelper.nonClimbableShape(this.level, possibleDismountPos),
                                 () -> DismountHelper.nonClimbableShape(this.level, possibleDismountPos.below())
