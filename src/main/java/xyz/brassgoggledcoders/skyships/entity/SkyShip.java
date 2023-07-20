@@ -634,9 +634,9 @@ public class SkyShip extends Entity {
 
     @Override
     protected void readAdditionalSaveData(@Nonnull CompoundTag pCompound) {
-        this.engine = SkyShipsEngines.CODEC.decode(NbtOps.INSTANCE, pCompound.get("Engine"))
-                .getOrThrow(true, error -> SkyShips.LOGGER.error("Failed to decode engine: {}", error))
-                .getFirst();
+        this.engine = SkyShipsEngines.CODEC.parse(NbtOps.INSTANCE, pCompound.get("Engine"))
+                .result()
+                .orElseGet(ManualEngine::new);
     }
 
     @Override
