@@ -13,6 +13,7 @@ public class ShellSkyShipRenderer extends SkyShipRenderer<ShellSkyShip> {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     protected void renderContents(ShellSkyShip skyShip, float pPartialTicks, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pPackedLight) {
         Minecraft.getInstance()
                 .getBlockRenderer()

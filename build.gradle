@@ -94,7 +94,7 @@ dependencies {
         jarJar.ranged(it, "[MC1.19-1.1.5,MC1.19.3)")
     }
 
-    implementation fg.deobf("xyz.brassgoggledcoders.transport:Transport:0.2.3:nodep")
+    implementation fg.deobf("xyz.brassgoggledcoders.transport:Transport:0.2.4:nodep")
 }
 
 jar {

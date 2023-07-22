@@ -7,8 +7,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
 import xyz.brassgoggledcoders.skyships.SkyShips;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsEntityTags;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsItems;
@@ -44,6 +42,6 @@ public class SkyShipsTransport {
             .register();
 
     public static void setup() {
-        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> SkyShipsTransportClientEventHandler::setup);
+
     }
 }
