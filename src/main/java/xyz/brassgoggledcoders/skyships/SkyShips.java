@@ -9,9 +9,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraftforge.common.util.Lazy;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.brassgoggledcoders.skyships.compat.transport.SkyShipsTransport;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsBlocks;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsEngines;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsEntities;
@@ -20,6 +22,7 @@ import xyz.brassgoggledcoders.skyships.network.NetworkHandler;
 import xyz.brassgoggledcoders.skyships.registrate.NonLivingEntityLootTables;
 
 import javax.annotation.Nonnull;
+import java.util.function.Supplier;
 
 @Mod(SkyShips.ID)
 public class SkyShips {
@@ -51,6 +54,8 @@ public class SkyShips {
         SkyShipsEngines.setup();
         SkyShipsItems.setup();
         SkyShipsEntities.setup();
+
+        tryCompat("transport", () -> SkyShipsTransport::setup);
     }
 
     public static Registrate getRegistrate() {
@@ -59,5 +64,11 @@ public class SkyShips {
 
     public static ResourceLocation rl(String path) {
         return new ResourceLocation(ID, path);
+    }
+
+    public void tryCompat(String mod, Supplier<Runnable> setup) {
+        if (ModList.get().isLoaded(mod)) {
+            setup.get().run();
+        }
     }
 }

@@ -3,6 +3,7 @@ package xyz.brassgoggledcoders.skyships.renderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
+import net.minecraft.client.model.PandaModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -15,7 +16,7 @@ import xyz.brassgoggledcoders.skyships.entity.SkyShip;
 
 import javax.annotation.Nonnull;
 
-public class SkyShipRenderer extends EntityRenderer<SkyShip> {
+public class SkyShipRenderer<T extends SkyShip> extends EntityRenderer<T> {
     private static final ResourceLocation BALLOON_TEXTURE = SkyShips.rl("textures/entity/balloon_white.png");
     private static final ResourceLocation STEERING_TEXTURE = SkyShips.rl("textures/entity/steering_oak.png");
     private static final ResourceLocation GONDOLA_TEXTURE = SkyShips.rl("textures/entity/gondola_oak.png");
@@ -36,7 +37,7 @@ public class SkyShipRenderer extends EntityRenderer<SkyShip> {
     }
 
     @Override
-    public void render(SkyShip pEntity, float pEntityYaw, float pPartialTicks, PoseStack pMatrixStack, @Nonnull MultiBufferSource pBuffer, int pPackedLight) {
+    public void render(T pEntity, float pEntityYaw, float pPartialTicks, PoseStack pMatrixStack, @Nonnull MultiBufferSource pBuffer, int pPackedLight) {
         pMatrixStack.pushPose();
         pMatrixStack.translate(0.0D, 0.375D, 0.0D);
         pMatrixStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - pEntityYaw));
@@ -66,14 +67,25 @@ public class SkyShipRenderer extends EntityRenderer<SkyShip> {
         VertexConsumer steeringVertexBuilder = pBuffer.getBuffer(this.gondolaModel.renderType(GONDOLA_TEXTURE));
         this.gondolaModel.renderToBuffer(pMatrixStack, steeringVertexBuilder, pPackedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
 
+        pMatrixStack.pushPose();
+        pMatrixStack.mulPose(Vector3f.ZP.rotationDegrees(180));
+        pMatrixStack.scale(0.75F, 0.75F, 0.75F);
+        pMatrixStack.translate(-0.875D, -2.0625F, 0.5D);
+        pMatrixStack.mulPose(Vector3f.YP.rotationDegrees(90.0F));
+        renderContents(pEntity, pPartialTicks, pMatrixStack, pBuffer, pPackedLight);
+        pMatrixStack.popPose();
+
         pMatrixStack.popPose();
         super.render(pEntity, pEntityYaw, pPartialTicks, pMatrixStack, pBuffer, pPackedLight);
     }
-
 
     @Override
     @Nonnull
     public ResourceLocation getTextureLocation(@Nonnull SkyShip pEntity) {
         return BALLOON_TEXTURE;
+    }
+
+    protected void renderContents(T skyShip, float pPartialTicks, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pPackedLight) {
+
     }
 }

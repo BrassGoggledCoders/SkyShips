@@ -76,6 +76,7 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
+    mavenLocal()
     maven {
         name = "Registrate"
         url = "https://maven.tterrag.com/"
@@ -92,6 +93,8 @@ dependencies {
     jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "MC1.19-1.1.5") {
         jarJar.ranged(it, "[MC1.19-1.1.5,MC1.19.3)")
     }
+
+    implementation fg.deobf("xyz.brassgoggledcoders.transport:Transport:0.2.4:nodep")
 }
 
 jar {

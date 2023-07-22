@@ -1,5 +1,6 @@
 {
   "values": [
-    "skyships:sky_ship"
+    "skyships:sky_ship",
+    "skyships:shell_sky_ship"
   ]
 }
