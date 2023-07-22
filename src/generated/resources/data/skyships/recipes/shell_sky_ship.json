@@ -1,0 +1,9 @@
+{
+  "type": "transport:shell_items",
+  "input": {
+    "item": "skyships:sky_ship"
+  },
+  "output": {
+    "item": "skyships:shell_sky_ship"
+  }
+}

@@ -2,7 +2,10 @@
   "block.skyships.aeroporte_controller": "ɹǝןןoɹʇuoƆ ǝʇɹodoɹǝⱯ",
   "block.skyships.aeroporte_oak_post": "ʇsoԀ ʞɐO ǝʇɹodoɹǝⱯ",
   "entity.skyships.aeroporte_hook": "ʞooH ǝʇɹodoɹǝⱯ",
+  "entity.skyships.shell_sky_ship": "dıɥS ʎʞS ןןǝɥS",
+  "entity.skyships.shell_sky_ship.with": "%s ɥʇıʍ dıɥS ʎʞS",
   "entity.skyships.sky_ship": "dıɥS ʎʞS",
+  "item.skyships.shell_sky_ship": "dıɥS ʎʞS ןןǝɥS",
   "item.skyships.sky_ship": "dıɥS ʎʞS",
   "itemGroup.skyships": "sdıɥS ʎʞS"
 }

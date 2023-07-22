@@ -1,11 +1,12 @@
-// 1.19.2	2023-07-16T16:26:06.8049038	Registrate Provider for skyships [Recipes, Advancements, Loot tables, Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), Blockstates, Item models, Lang (en_us/en_ud)]
+// 1.19.2	2023-07-22T00:23:24.6603644	Registrate Provider for skyships [Recipes, Advancements, Loot tables, Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), Blockstates, Item models, Lang (en_us/en_ud), Shell Content Creator Data]
 fc57415160e637d104e6cbaee6225e47ee661bc4 assets/skyships/blockstates/aeroporte_controller.json
 4a7d4e15fc4fcd42965aa054061d391a721156c1 assets/skyships/blockstates/aeroporte_oak_post.json
-288abb7d9d5c30f4bceea70f3e30e7c9b3438ec7 assets/skyships/lang/en_ud.json
-365e1a909471336df27752176c14a8b9881073c0 assets/skyships/lang/en_us.json
+e7d8c54220e7750120e6ef9b13dfa2e5ee46d58e assets/skyships/lang/en_ud.json
+4ab582346d4e99bf131b917947f9716696caca4a assets/skyships/lang/en_us.json
 a7a1c26a7c6b0979efcf548430b04d9fca654080 assets/skyships/models/block/aeroporte_controller.json
 58237bccf2d2ac0864f498e6b9029b0f35f518ce assets/skyships/models/item/aeroporte_controller.json
 44f87f34e9acd12a181e425d6d1024d50f28b434 assets/skyships/models/item/aeroporte_oak_post.json
+35e9fe569dcd28ed8082575921d62e8c851f42bd assets/skyships/models/item/shell_sky_ship.json
 35e9fe569dcd28ed8082575921d62e8c851f42bd assets/skyships/models/item/sky_ship.json
 c1847b19f269dfbaca89c3df2beda22b1180b50f data/skyships/advancements/recipes/skyships/aeroporte_controller.json
 032feb151a42f885a375dd03731b4c3093fb8320 data/skyships/advancements/recipes/skyships/aeroporte_oak_post.json
@@ -13,8 +14,10 @@ c1847b19f269dfbaca89c3df2beda22b1180b50f data/skyships/advancements/recipes/skys
 8c742c36824687a5ca666cc2a177d1110adcc8cb data/skyships/loot_tables/blocks/aeroporte_controller.json
 02f3239dbdbaa3af53aecf00565b03fb62f1f826 data/skyships/loot_tables/blocks/aeroporte_oak_post.json
 ef017fe8afbc1e704a7cfb4818ece7ba018f9c91 data/skyships/loot_tables/entities/aeroporte_hook.json
+ef017fe8afbc1e704a7cfb4818ece7ba018f9c91 data/skyships/loot_tables/entities/shell_sky_ship.json
 9a2088236c8302f18228da7ab970768815f0de97 data/skyships/loot_tables/entities/sky_ship.json
 a1ebb315fd14daebf2de7662181e57be8ef7501c data/skyships/recipes/aeroporte_controller.json
 0e5e332182de2f67524d7bfba59cfffb7a66e30c data/skyships/recipes/aeroporte_oak_post.json
+daf15a44e24be1777b7701fd7428240e036e22c1 data/skyships/recipes/shell_sky_ship.json
 c424c354577a6b5427f427c9a63dd8ac7642207e data/skyships/recipes/sky_ship.json
-bebe5efc36b33735a8e1d14683033c653e9af356 data/skyships/tags/entity_types/dockable.json
+cc15af53db90566e854003d1654b301edad2ee4a data/skyships/tags/entity_types/dockable.json
