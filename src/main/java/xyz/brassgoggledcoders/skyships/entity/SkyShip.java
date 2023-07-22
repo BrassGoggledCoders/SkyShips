@@ -89,9 +89,14 @@ public class SkyShip extends Entity {
         super(type, level);
     }
 
-    public SkyShip(Level level, double x, double y, double z) {
-        super(SkyShipsEntities.SKY_SHIP.get(), level);
-        this.setPos(x, y, z);
+    public SkyShip(Level level, Vec3 location) {
+        this(SkyShipsEntities.SKY_SHIP.get(), level, location);
+        this.setPos(location.x(), location.y(), location.z());
+    }
+
+    public SkyShip(EntityType<?> entityType, Level level, Vec3 location) {
+        super(entityType, level);
+        this.setPos(location.x(), location.y(), location.z());
     }
 
     @Override
@@ -171,10 +176,10 @@ public class SkyShip extends Entity {
             boolean flag = pSource.getEntity() instanceof Player && ((Player) pSource.getEntity()).getAbilities().instabuild;
             if (flag || this.getDamage() > 40.0F) {
                 if (!flag && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-                    this.spawnLoot(pSource);
+                    this.destroy(pSource);
                 }
 
-                this.remove(RemovalReason.KILLED);
+                this.discard();
             }
 
             return true;
@@ -183,9 +188,13 @@ public class SkyShip extends Entity {
         }
     }
 
+    protected void destroy(DamageSource pDamageSource) {
+        this.kill();
+        this.spawnLoot(pDamageSource);
+    }
+
     private void spawnLoot(DamageSource pSource) {
         if (this.level instanceof ServerLevel serverLevel) {
-
             LootContext lootContext = new LootContext.Builder(serverLevel)
                     .withRandom(this.random)
                     .withParameter(LootContextParams.THIS_ENTITY, this)

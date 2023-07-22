@@ -4,8 +4,6 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.entity.vehicle.ChestBoat;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
@@ -31,7 +29,7 @@ public class SkyShipItem extends Item {
         if (hitResult.getType() == HitResult.Type.MISS) {
             return InteractionResultHolder.pass(itemStack);
         } else if (hitResult.getType() == HitResult.Type.BLOCK) {
-            SkyShip skyShip = this.getSkyShip(pLevel, hitResult);
+            SkyShip skyShip = this.getSkyShip(pLevel, hitResult, itemStack);
             skyShip.setYRot(pPlayer.getYRot());
             if (!pLevel.noCollision(skyShip, skyShip.getBoundingBox())) {
                 return InteractionResultHolder.fail(itemStack);
@@ -52,7 +50,7 @@ public class SkyShipItem extends Item {
         }
     }
 
-    private SkyShip getSkyShip(Level level, HitResult hitResult) {
-        return new SkyShip(level, hitResult.getLocation().x, hitResult.getLocation().y, hitResult.getLocation().z);
+    protected SkyShip getSkyShip(Level level, HitResult hitResult, ItemStack itemStack) {
+        return new SkyShip(level, hitResult.getLocation());
     }
 }
