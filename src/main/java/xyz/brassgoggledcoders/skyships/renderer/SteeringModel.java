@@ -3,17 +3,15 @@ package xyz.brassgoggledcoders.skyships.renderer;// Made with Blockbench 4.1.1
 // Paste this class into your mod and generate all required imports
 
 
-import javax.annotation.ParametersAreNonnullByDefault;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
-
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import xyz.brassgoggledcoders.skyships.entity.SkyShip;
+
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @SuppressWarnings("unused")
 public class SteeringModel<T extends SkyShip> extends EntityModel<T> {
@@ -50,8 +48,18 @@ public class SteeringModel<T extends SkyShip> extends EntityModel<T> {
     @Override
     @ParametersAreNonnullByDefault
     public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-    	this.leftPropeller.xRot = entity.level.getGameTime() % 360;
-    	this.rightPropeller.xRot = -entity.level.getGameTime() % 360;
+        if (entity.getPaddleState(0)) {
+            this.leftPropeller.xRot = entity.getRowingTime(0, limbSwing);
+            if (!entity.getPaddleState(1)) {
+                this.rightPropeller.xRot = -entity.getRowingTime(0, limbSwing);
+            }
+        }
+        if (entity.getPaddleState(1)) {
+            this.rightPropeller.xRot = entity.getRowingTime(1, limbSwing);
+            if (!entity.getPaddleState(0)) {
+                this.leftPropeller.xRot = -entity.getRowingTime(1, limbSwing);
+            }
+        }
     }
 
     @Override
