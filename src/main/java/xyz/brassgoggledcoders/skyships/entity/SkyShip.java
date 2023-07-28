@@ -39,10 +39,12 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 import xyz.brassgoggledcoders.skyships.SkyShips;
+import xyz.brassgoggledcoders.skyships.capability.RunnableItemHandler;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsEngines;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsEntities;
 import xyz.brassgoggledcoders.skyships.engine.Engine;
 import xyz.brassgoggledcoders.skyships.engine.ManualEngine;
+import xyz.brassgoggledcoders.skyships.navigation.Navigator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -89,12 +91,12 @@ public class SkyShip extends Entity {
     private SkyShipStatus oldStatus;
     private double lastYd;
 
+    @NotNull
     private Engine engine;
-
-    public SkyShip(EntityType<?> type, Level level) {
-        super(type, level);
-        this.engine = new ManualEngine();
-    }
+    @NotNull
+    private final Navigator navigator;
+    @NotNull
+    private final RunnableItemHandler navigatorInventory;
 
     public SkyShip(Level level, Vec3 location) {
         this(SkyShipsEntities.SKY_SHIP.get(), level, location);
@@ -102,8 +104,20 @@ public class SkyShip extends Entity {
     }
 
     public SkyShip(EntityType<?> entityType, Level level, Vec3 location) {
-        super(entityType, level);
+        this(entityType, level);
         this.setPos(location.x(), location.y(), location.z());
+    }
+
+    public SkyShip(EntityType<?> type, Level level) {
+        super(type, level);
+        this.engine = new ManualEngine();
+        this.navigatorInventory = new RunnableItemHandler(1, this::handleNavigationChange);
+        this.navigator = new Navigator(this, this.navigatorInventory);
+    }
+
+    public void handleNavigationChange() {
+        this.getNavigator()
+                .resetChecks();
     }
 
     @Override
@@ -279,11 +293,18 @@ public class SkyShip extends Entity {
         this.engine.tick(this);
 
         if (this.isControlledByLocalInstance()) {
-            if (this.engine.canRun(this)) {
-                this.engine.maneuver(this);
-            }
+            if (this.engine.tryRun(this)) {
+                this.floatBoat();
+                if (this.getLevel().isClientSide()) {
+                    this.controlBoat();
+                    SkyShips.networkHandler.updateSkyShipControl(this.getPaddleState(0), this.getPaddleState(1), this.getInputVertical());
+                }
 
-            this.move(MoverType.SELF, this.getDeltaMovement());
+                this.move(MoverType.SELF, this.getDeltaMovement());
+            } else {
+                this.setDeltaMovement(Vec3.ZERO);
+                this.setPaddleState(false, false, 0);
+            }
         } else {
             this.setDeltaMovement(Vec3.ZERO);
         }
@@ -380,7 +401,7 @@ public class SkyShip extends Entity {
         int l = Mth.ceil(boundingBox.maxY - this.lastYd);
         int i1 = Mth.floor(boundingBox.minZ);
         int j1 = Mth.ceil(boundingBox.maxZ);
-        BlockPos.MutableBlockPos blockpos$mutable = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos mutableWaterPos = new BlockPos.MutableBlockPos();
 
         label39:
         for (int k1 = k; k1 < l; ++k1) {
@@ -388,10 +409,10 @@ public class SkyShip extends Entity {
 
             for (int l1 = i; l1 < j; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
-                    blockpos$mutable.set(l1, k1, i2);
-                    FluidState fluidstate = this.level.getFluidState(blockpos$mutable);
+                    mutableWaterPos.set(l1, k1, i2);
+                    FluidState fluidstate = this.level.getFluidState(mutableWaterPos);
                     if (fluidstate.is(FluidTags.WATER)) {
-                        f = Math.max(f, fluidstate.getHeight(this.level, blockpos$mutable));
+                        f = Math.max(f, fluidstate.getHeight(this.level, mutableWaterPos));
                     }
 
                     if (f >= 1.0F) {
@@ -401,7 +422,7 @@ public class SkyShip extends Entity {
             }
 
             if (f < 1.0F) {
-                return (float) blockpos$mutable.getY() + f;
+                return (float) mutableWaterPos.getY() + f;
             }
         }
 
@@ -464,13 +485,13 @@ public class SkyShip extends Entity {
     }
 
     private boolean checkInWater() {
-        AABB axisalignedbb = this.getBoundingBox();
-        int i = Mth.floor(axisalignedbb.minX);
-        int j = Mth.ceil(axisalignedbb.maxX);
-        int k = Mth.floor(axisalignedbb.minY);
-        int l = Mth.ceil(axisalignedbb.minY + 0.001D);
-        int i1 = Mth.floor(axisalignedbb.minZ);
-        int j1 = Mth.ceil(axisalignedbb.maxZ);
+        AABB boundingBox = this.getBoundingBox();
+        int i = Mth.floor(boundingBox.minX);
+        int j = Mth.ceil(boundingBox.maxX);
+        int k = Mth.floor(boundingBox.minY);
+        int l = Mth.ceil(boundingBox.minY + 0.001D);
+        int i1 = Mth.floor(boundingBox.minZ);
+        int j1 = Mth.ceil(boundingBox.maxZ);
         boolean flag = false;
         this.waterLevel = Double.MIN_VALUE;
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
@@ -483,7 +504,7 @@ public class SkyShip extends Entity {
                     if (fluidstate.is(FluidTags.WATER)) {
                         float f = (float) l1 + fluidstate.getHeight(this.level, mutableBlockPos);
                         this.waterLevel = Math.max(f, this.waterLevel);
-                        flag |= axisalignedbb.minY < (double) f;
+                        flag |= boundingBox.minY < (double) f;
                     }
                 }
             }
@@ -494,14 +515,14 @@ public class SkyShip extends Entity {
 
     @Nullable
     private SkyShipStatus isUnderFluid() {
-        AABB axisalignedbb = this.getBoundingBox();
-        double d0 = axisalignedbb.maxY + 0.001D;
-        int i = Mth.floor(axisalignedbb.minX);
-        int j = Mth.ceil(axisalignedbb.maxX);
-        int k = Mth.floor(axisalignedbb.maxY);
+        AABB boundingBox = this.getBoundingBox();
+        double d0 = boundingBox.maxY + 0.001D;
+        int i = Mth.floor(boundingBox.minX);
+        int j = Mth.ceil(boundingBox.maxX);
+        int k = Mth.floor(boundingBox.maxY);
         int l = Mth.ceil(d0);
-        int i1 = Mth.floor(axisalignedbb.minZ);
-        int j1 = Mth.ceil(axisalignedbb.maxZ);
+        int i1 = Mth.floor(boundingBox.minZ);
+        int j1 = Mth.ceil(boundingBox.maxZ);
         boolean flag = false;
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
@@ -564,17 +585,17 @@ public class SkyShip extends Entity {
 
             this.setYRot(this.getYRot() + this.deltaRotation);
             if (this.inputUp) {
-                f += 0.15F;
+                f += engine.getSpeedModifier(this);
             }
 
             if (this.inputDown) {
-                f -= 0.05F;
+                f -= engine.getSpeedModifier(this) / 3;
             }
 
             Vec3 vector3d = this.getDeltaMovement();
             this.setDeltaMovement(new Vec3(
                     vector3d.x + Mth.sin(-this.getYRot() * ((float) Math.PI / 180F)) * f,
-                    this.inputVertical > 0 ? 0.15F : 0F,
+                    this.inputVertical > 0 ? engine.getSpeedModifier(this) : 0F,
                     vector3d.z + Mth.cos(this.getYRot() * ((float) Math.PI / 180F)) * f)
             );
             this.setPaddleState(this.inputRight && !this.inputLeft || this.inputUp, this.inputLeft && !this.inputRight || this.inputUp, inputVertical);
@@ -646,6 +667,8 @@ public class SkyShip extends Entity {
         this.engine = SkyShipsEngines.CODEC.parse(NbtOps.INSTANCE, pCompound.get("Engine"))
                 .result()
                 .orElseGet(ManualEngine::new);
+
+        this.navigatorInventory.deserializeNBT(pCompound.getCompound("NavigatorInventory"));
     }
 
     @Override
@@ -655,6 +678,8 @@ public class SkyShip extends Entity {
                 SkyShipsEngines.CODEC.encode(this.engine, NbtOps.INSTANCE, NbtOps.INSTANCE.empty())
                         .getOrThrow(true, error -> SkyShips.LOGGER.error("Failed to encode engine: {}", error))
         );
+
+        pCompound.put("NavigatorInventory", this.navigatorInventory.serializeNBT());
     }
 
     @Override
@@ -781,5 +806,10 @@ public class SkyShip extends Entity {
 
     public int getInputVertical() {
         return inputVertical;
+    }
+
+    @NotNull
+    public Navigator getNavigator() {
+        return this.navigator;
     }
 }

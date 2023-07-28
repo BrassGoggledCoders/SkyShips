@@ -3,6 +3,7 @@ package xyz.brassgoggledcoders.skyships.engine;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.ForgeHooks;
 import org.jetbrains.annotations.NotNull;
 import xyz.brassgoggledcoders.skyships.entity.SkyShip;
 
@@ -12,7 +13,6 @@ public class SolidFuelEngine extends Engine {
             Codec.INT.fieldOf("burnRemaining").forGetter(SolidFuelEngine::getBurnRemaining),
             Codec.INT.fieldOf("maxBurn").forGetter(SolidFuelEngine::getMaxBurn)
     ).apply(instance, SolidFuelEngine::new));
-
 
     private ItemStack fuel;
     private int burnRemaining;
@@ -29,8 +29,19 @@ public class SolidFuelEngine extends Engine {
     }
 
     @Override
-    public boolean canRun(SkyShip skyShip) {
-        return false;
+    public boolean tryRun(SkyShip skyShip) {
+        if (burnRemaining-- <= 0 && !this.fuel.isEmpty()) {
+            int newMaxBurn = ForgeHooks.getBurnTime(this.fuel, null);
+            if (newMaxBurn > 0) {
+                this.maxBurn = newMaxBurn;
+                if (this.fuel.hasCraftingRemainingItem()) {
+                    this.fuel = this.fuel.getCraftingRemainingItem();
+                } else {
+                    this.fuel.shrink(1);
+                }
+            }
+        }
+        return burnRemaining > 0;
     }
 
     @Override
@@ -39,24 +50,12 @@ public class SolidFuelEngine extends Engine {
         return CODEC;
     }
 
-    public void setFuel(ItemStack fuel) {
-        this.fuel = fuel;
-    }
-
     public ItemStack getFuel() {
         return fuel;
     }
 
-    public void setBurnRemaining(int burnRemaining) {
-        this.burnRemaining = burnRemaining;
-    }
-
     public int getBurnRemaining() {
         return burnRemaining;
-    }
-
-    public void setMaxBurn(int maxBurn) {
-        this.maxBurn = maxBurn;
     }
 
     public int getMaxBurn() {

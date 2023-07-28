@@ -10,10 +10,11 @@ import net.minecraftforge.registries.RegistryManager;
 import xyz.brassgoggledcoders.skyships.SkyShips;
 import xyz.brassgoggledcoders.skyships.engine.Engine;
 import xyz.brassgoggledcoders.skyships.engine.ManualEngine;
+import xyz.brassgoggledcoders.skyships.engine.SolidFuelEngine;
 
 import java.util.function.Function;
 
-@SuppressWarnings("UnstableApiUsage")
+@SuppressWarnings({"UnstableApiUsage", "unused"})
 public class SkyShipsEngines {
 
     public static final ResourceKey<Registry<Codec<? extends Engine>>> RESOURCE_KEY = SkyShips.getRegistrate()
@@ -31,6 +32,10 @@ public class SkyShipsEngines {
     public static final RegistryEntry<Codec<ManualEngine>> MANUAL = SkyShips.getRegistrate()
             .object("manual")
             .simple(RESOURCE_KEY, () -> ManualEngine.CODEC);
+
+    public static final RegistryEntry<Codec<SolidFuelEngine>> SOLID_FUEL = SkyShips.getRegistrate()
+            .object("solid_fuel")
+            .simple(RESOURCE_KEY, () -> SolidFuelEngine.CODEC);
 
     public static void setup() {
 
