@@ -19,4 +19,11 @@ public abstract class Engine {
     public float getSpeedModifier(SkyShip skyShip) {
         return 0.15F;
     }
+
+    /**
+     * @return Determines whether this Engine supports features such as Navigation
+     */
+    public boolean isAdvanced() {
+        return true;
+    }
 }

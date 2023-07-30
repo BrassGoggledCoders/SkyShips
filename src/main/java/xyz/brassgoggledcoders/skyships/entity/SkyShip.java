@@ -90,6 +90,7 @@ public class SkyShip extends Entity {
     private SkyShipStatus status;
     private SkyShipStatus oldStatus;
     private double lastYd;
+    private long lastPlayerControlTick;
 
     @NotNull
     private Engine engine;
@@ -298,6 +299,8 @@ public class SkyShip extends Entity {
                 if (this.getLevel().isClientSide()) {
                     this.controlBoat();
                     SkyShips.networkHandler.updateSkyShipControl(this.getPaddleState(0), this.getPaddleState(1), this.getInputVertical());
+                } else if (this.engine.isAdvanced() && this.getLevel().getGameTime() > this.lastPlayerControlTick + 100) {
+                    this.navigator.navigate();
                 }
 
                 this.move(MoverType.SELF, this.getDeltaMovement());
@@ -656,6 +659,14 @@ public class SkyShip extends Entity {
         this.entityData.set(DATA_ID_VERTICAL, vertical);
     }
 
+    public void setPlayerPaddleState(boolean pLeft, boolean pRight, int vertical) {
+        this.setPaddleState(pLeft, pRight, vertical);
+
+        if (pLeft || pRight || vertical != 0) {
+            this.lastPlayerControlTick = this.getLevel().getGameTime();
+        }
+    }
+
     @SuppressWarnings("unused")
     public float getRowingTime(int pSide, float pLimbSwing) {
         //return this.getPaddleState(pSide) ? (float) Mth.lerp(pLimbSwing, this.paddlePositions[pSide], (double) this.paddlePositions[pSide] - (double) ((float) Math.PI / 8F)) : this.paddlePositions[pSide];
@@ -695,6 +706,7 @@ public class SkyShip extends Entity {
             passenger.yRotO = this.getYRot();
             passenger.setYRot(this.getYRot());
             passenger.setYHeadRot(this.getYRot());
+            this.lastPlayerControlTick = this.getLevel().getGameTime();
         }
         if (this.isControlledByLocalInstance() && this.lerpSteps > 0) {
             this.lerpSteps = 0;

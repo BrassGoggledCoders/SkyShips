@@ -61,4 +61,9 @@ public class SolidFuelEngine extends Engine {
     public int getMaxBurn() {
         return maxBurn;
     }
+
+    @Override
+    public boolean isAdvanced() {
+        return true;
+    }
 }

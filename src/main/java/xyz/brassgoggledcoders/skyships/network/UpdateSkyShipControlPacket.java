@@ -27,7 +27,7 @@ public class UpdateSkyShipControlPacket {
     public void consume(Supplier<NetworkEvent.Context> contextSupplier) {
         ServerPlayer player = contextSupplier.get().getSender();
         if (player != null && player.getVehicle() instanceof SkyShip) {
-            ((SkyShip) player.getVehicle()).setPaddleState(
+            ((SkyShip) player.getVehicle()).setPlayerPaddleState(
                     left,
                     right,
                     vertical

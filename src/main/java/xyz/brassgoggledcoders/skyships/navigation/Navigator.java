@@ -1,5 +1,6 @@
 package xyz.brassgoggledcoders.skyships.navigation;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
@@ -14,20 +15,62 @@ public class Navigator {
     private final IItemHandler navigationInventory;
     private int currentSlot;
     @NotNull
-    private Result<GlobalPos> destination;
+    private Result<GlobalPos> destinationResult;
 
     public Navigator(SkyShip skyShip, IItemHandler navigationInventory) {
         this.skyShip = skyShip;
         this.navigationInventory = navigationInventory;
-        this.destination = Result.waiting();
+        this.destinationResult = Result.waiting();
     }
 
     public void navigate() {
-        this.destination = destination.run(this::findDestination);
+        this.destinationResult = destinationResult.run(this::findDestination);
+
+        if (this.destinationResult.isSuccess()) {
+            GlobalPos destination = this.destinationResult.value();
+
+            if (destination.dimension() == this.skyShip.getLevel().dimension()) {
+                int vertical = 0;
+                if (this.skyShip.getEyePosition().y() < this.skyShip.getLevel().getSeaLevel() + 50) {
+                    vertical = 1;
+                }
+
+                boolean left = false;
+                boolean right = false;
+
+                float delta = getDelta(destination);
+                if (delta < 175 && delta > 5) {
+                    left = true;
+                } else if (delta > 185 && delta < 355) {
+                    right = true;
+                } else {
+                    left = true;
+                    right = true;
+                }
+
+                this.skyShip.setPaddleState(left, right, vertical);
+            }
+        }
+    }
+
+    private float getDelta(GlobalPos destination) {
+        BlockPos entityPos = this.skyShip.getOnPos();
+        int xOffset = entityPos.getX() - destination.pos().getX();
+        int zOffset = entityPos.getZ() - destination.pos().getZ();
+        float expectedYaw = (float) (-Math.toDegrees(Math.atan2(xOffset, zOffset)) + 180F);
+
+        float delta = expectedYaw - this.skyShip.getYRot();
+
+        if (delta < 0) {
+            delta += 360;
+        } else if (delta > 360) {
+            delta -= 360;
+        }
+        return delta;
     }
 
     public void resetChecks() {
-        this.destination = Result.waiting();
+        this.destinationResult = Result.waiting();
     }
 
     private Optional<GlobalPos> findDestination() {
