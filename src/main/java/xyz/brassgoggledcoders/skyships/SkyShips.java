@@ -6,7 +6,6 @@ import com.tterrag.registrate.providers.loot.RegistrateLootTableProvider.LootTyp
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.fml.ModList;
@@ -34,7 +33,7 @@ public class SkyShips {
                 @Override
                 @Nonnull
                 public ItemStack makeIcon() {
-                    return Items.OAK_BOAT.getDefaultInstance();
+                    return SkyShipsItems.SKY_SHIP.asStack();
                 }
             }, "Sky Ships")
     );

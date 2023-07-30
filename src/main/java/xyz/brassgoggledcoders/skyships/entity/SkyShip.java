@@ -23,6 +23,8 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.DismountHelper;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.WaterlilyBlock;
@@ -44,6 +46,7 @@ import xyz.brassgoggledcoders.skyships.content.SkyShipsEngines;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsEntities;
 import xyz.brassgoggledcoders.skyships.engine.Engine;
 import xyz.brassgoggledcoders.skyships.engine.ManualEngine;
+import xyz.brassgoggledcoders.skyships.engine.SolidFuelEngine;
 import xyz.brassgoggledcoders.skyships.navigation.Navigator;
 
 import javax.annotation.Nonnull;
@@ -154,7 +157,17 @@ public class SkyShip extends Entity {
         if (pPlayer.isSecondaryUseActive()) {
             return InteractionResult.PASS;
         } else if (this.outOfControlTicks < 60.0F) {
-            if (!this.level.isClientSide) {
+            ItemStack heldStack = pPlayer.getItemInHand(pHand);
+            if (heldStack.is(Items.FURNACE)) {
+                this.engine = new SolidFuelEngine();
+                return InteractionResult.sidedSuccess(this.getLevel().isClientSide());
+            } else if (heldStack.is(Items.COMPASS)) {
+                this.navigatorInventory.setStackInSlot(0, heldStack.copy());
+                return InteractionResult.sidedSuccess(this.getLevel().isClientSide());
+            } else if (heldStack.is(Items.COAL) && this.engine instanceof SolidFuelEngine solidFuelEngine) {
+                solidFuelEngine.setFuel(heldStack.copy());
+                return InteractionResult.sidedSuccess(this.getLevel().isClientSide());
+            } else if (!this.level.isClientSide) {
                 return pPlayer.startRiding(this) ? InteractionResult.CONSUME : InteractionResult.PASS;
             } else {
                 return InteractionResult.SUCCESS;
@@ -308,6 +321,8 @@ public class SkyShip extends Entity {
                 this.setDeltaMovement(Vec3.ZERO);
                 this.setPaddleState(false, false, 0);
             }
+        } else if (this.engine.isAdvanced() && this.getLevel().getGameTime() > this.lastPlayerControlTick + 100) {
+            this.navigator.navigate();
         } else {
             this.setDeltaMovement(Vec3.ZERO);
         }
@@ -571,6 +586,43 @@ public class SkyShip extends Entity {
         }
     }
 
+    public void navigateBoat(int yawDirection, int speedDirection, int heightDirection) {
+        float engineModifier = this.engine.getSpeedModifier(this);
+        float f = 0.0F;
+        if (yawDirection < 0) {
+            --this.deltaRotation;
+        }
+
+        if (yawDirection > 0) {
+            ++this.deltaRotation;
+        }
+
+        if (yawDirection == 0 && speedDirection == 0) {
+            f += 0.005F;
+        }
+
+        this.setYRot(this.getYRot() + this.deltaRotation);
+        if (speedDirection > 0) {
+            f += engineModifier;
+        }
+
+        if (speedDirection < 0) {
+            f -= engineModifier / 3;
+        }
+
+        Vec3 vector3d = this.getDeltaMovement();
+        this.setDeltaMovement(new Vec3(
+                vector3d.x + Mth.sin(-this.getYRot() * ((float) Math.PI / 180F)) * f,
+                heightDirection * engineModifier,
+                vector3d.z + Mth.cos(this.getYRot() * ((float) Math.PI / 180F)) * f)
+        );
+        this.setPaddleState(
+                yawDirection < 0 || speedDirection != 0,
+                yawDirection > 0 || speedDirection != 0,
+                heightDirection
+        );
+    }
+
     public void controlBoat() {
         if (this.isVehicle()) {
             float f = 0.0F;
@@ -734,7 +786,7 @@ public class SkyShip extends Entity {
     }
 
     public boolean getPaddleState(int pSide) {
-        return this.entityData.get(pSide == 0 ? DATA_ID_PADDLE_LEFT : DATA_ID_PADDLE_RIGHT) && this.getControllingPassenger() != null;
+        return this.entityData.get(pSide == 0 ? DATA_ID_PADDLE_LEFT : DATA_ID_PADDLE_RIGHT);
     }
 
     public void setDamage(float pDamageTaken) {

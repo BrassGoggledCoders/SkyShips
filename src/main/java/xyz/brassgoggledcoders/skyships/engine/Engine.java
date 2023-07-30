@@ -24,6 +24,6 @@ public abstract class Engine {
      * @return Determines whether this Engine supports features such as Navigation
      */
     public boolean isAdvanced() {
-        return true;
+        return false;
     }
 }

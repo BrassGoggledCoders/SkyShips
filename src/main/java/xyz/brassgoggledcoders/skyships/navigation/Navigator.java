@@ -3,6 +3,7 @@ package xyz.brassgoggledcoders.skyships.navigation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 import xyz.brassgoggledcoders.skyships.entity.SkyShip;
@@ -31,24 +32,22 @@ public class Navigator {
 
             if (destination.dimension() == this.skyShip.getLevel().dimension()) {
                 int vertical = 0;
-                if (this.skyShip.getEyePosition().y() < this.skyShip.getLevel().getSeaLevel() + 50) {
+                BlockPos entityPos = this.skyShip.getOnPos();
+                int groundHeight = this.skyShip.getLevel().getHeight(Heightmap.Types.WORLD_SURFACE_WG, entityPos.getX(), entityPos.getZ());
+                if (this.skyShip.getEyePosition().y() < groundHeight + 10) {
                     vertical = 1;
                 }
 
-                boolean left = false;
-                boolean right = false;
+                int yawDirection = 0;
 
                 float delta = getDelta(destination);
                 if (delta < 175 && delta > 5) {
-                    left = true;
+                    yawDirection = 1;
                 } else if (delta > 185 && delta < 355) {
-                    right = true;
-                } else {
-                    left = true;
-                    right = true;
+                    yawDirection = -1;
                 }
 
-                this.skyShip.setPaddleState(left, right, vertical);
+                this.skyShip.navigateBoat(yawDirection, yawDirection == 0 ? 1 : 0, vertical);
             }
         }
     }
@@ -90,6 +89,7 @@ public class Navigator {
             if (globalPos.isPresent()) {
                 this.currentSlot = slot;
             }
+            attempts++;
         }
         return globalPos;
     }

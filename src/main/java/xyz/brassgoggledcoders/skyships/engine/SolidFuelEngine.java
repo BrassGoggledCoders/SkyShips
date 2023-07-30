@@ -34,6 +34,7 @@ public class SolidFuelEngine extends Engine {
             int newMaxBurn = ForgeHooks.getBurnTime(this.fuel, null);
             if (newMaxBurn > 0) {
                 this.maxBurn = newMaxBurn;
+                this.burnRemaining = newMaxBurn;
                 if (this.fuel.hasCraftingRemainingItem()) {
                     this.fuel = this.fuel.getCraftingRemainingItem();
                 } else {
@@ -52,6 +53,10 @@ public class SolidFuelEngine extends Engine {
 
     public ItemStack getFuel() {
         return fuel;
+    }
+
+    public void setFuel(ItemStack fuel) {
+        this.fuel = fuel;
     }
 
     public int getBurnRemaining() {
