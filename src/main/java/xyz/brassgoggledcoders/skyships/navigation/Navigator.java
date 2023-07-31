@@ -16,21 +16,30 @@ public class Navigator {
     private final IItemHandler navigationInventory;
     private int currentSlot;
     @NotNull
-    private Result<GlobalPos> destinationResult;
+    private Result<GlobalPos> navigationItemResult;
+    private Result<BlockPos> aeroporteResult;
 
     public Navigator(SkyShip skyShip, IItemHandler navigationInventory) {
         this.skyShip = skyShip;
         this.navigationInventory = navigationInventory;
-        this.destinationResult = Result.waiting();
+        this.navigationItemResult = Result.waiting();
+        this.aeroporteResult = Result.waiting();
     }
 
     public void navigate() {
-        this.destinationResult = destinationResult.run(this::findDestination);
+        this.navigationItemResult = navigationItemResult.run(this::findNavigationItem);
 
-        if (this.destinationResult.isSuccess()) {
-            GlobalPos destination = this.destinationResult.value();
+        if (this.navigationItemResult.isSuccess()) {
+            GlobalPos navigationItemPos = this.navigationItemResult.value();
 
-            if (destination.dimension() == this.skyShip.getLevel().dimension()) {
+            if (navigationItemPos.dimension() == this.skyShip.getLevel().dimension()) {
+                this.aeroporteResult = this.aeroporteResult.run(this::findAeroporte);
+
+                BlockPos destination = this.aeroporteResult.fold(
+                        aeroportePos -> aeroportePos,
+                        navigationItemPos::pos
+                );
+
                 int vertical = 0;
                 BlockPos entityPos = this.skyShip.getOnPos();
                 int groundHeight = this.skyShip.getLevel().getHeight(Heightmap.Types.WORLD_SURFACE_WG, entityPos.getX(), entityPos.getZ());
@@ -52,10 +61,10 @@ public class Navigator {
         }
     }
 
-    private float getDelta(GlobalPos destination) {
+    private float getDelta(BlockPos destination) {
         BlockPos entityPos = this.skyShip.getOnPos();
-        int xOffset = entityPos.getX() - destination.pos().getX();
-        int zOffset = entityPos.getZ() - destination.pos().getZ();
+        int xOffset = entityPos.getX() - destination.getX();
+        int zOffset = entityPos.getZ() - destination.getZ();
         float expectedYaw = (float) (-Math.toDegrees(Math.atan2(xOffset, zOffset)) + 180F);
 
         float delta = expectedYaw - this.skyShip.getYRot();
@@ -69,10 +78,11 @@ public class Navigator {
     }
 
     public void resetChecks() {
-        this.destinationResult = Result.waiting();
+        this.navigationItemResult = Result.waiting();
+        this.aeroporteResult = Result.waiting();
     }
 
-    private Optional<GlobalPos> findDestination() {
+    private Optional<GlobalPos> findNavigationItem() {
         int maxAttempts = this.navigationInventory.getSlots();
 
         Optional<GlobalPos> globalPos = Optional.empty();
@@ -92,6 +102,25 @@ public class Navigator {
             attempts++;
         }
         return globalPos;
+    }
+
+    private Optional<BlockPos> findAeroporte() {
+        if (this.navigationItemResult.isSuccess()) {
+            GlobalPos destination = this.navigationItemResult.value();
+            if (destination.dimension() == this.skyShip.getLevel().dimension()) {
+                if (this.skyShip.getLevel() instanceof ServerLevel serverLevel) {
+                    return serverLevel.getPoiManager()
+                            .findClosest(
+                                    holder -> holder.is(SkyShipsPOITypes.AEROPORTE.getKey()),
+                                    destination.pos(),
+                                    32,
+                                    PoiManager.Occupancy.HAS_SPACE
+                            );
+                }
+            }
+        }
+
+        return Optional.empty();
     }
 
 }

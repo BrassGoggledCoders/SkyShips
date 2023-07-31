@@ -13,10 +13,7 @@ import net.minecraftforge.fml.common.Mod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.brassgoggledcoders.skyships.compat.transport.SkyShipsTransport;
-import xyz.brassgoggledcoders.skyships.content.SkyShipsBlocks;
-import xyz.brassgoggledcoders.skyships.content.SkyShipsEngines;
-import xyz.brassgoggledcoders.skyships.content.SkyShipsEntities;
-import xyz.brassgoggledcoders.skyships.content.SkyShipsItems;
+import xyz.brassgoggledcoders.skyships.content.*;
 import xyz.brassgoggledcoders.skyships.network.NetworkHandler;
 import xyz.brassgoggledcoders.skyships.registrate.NonLivingEntityLootTables;
 
@@ -53,6 +50,7 @@ public class SkyShips {
         SkyShipsEngines.setup();
         SkyShipsItems.setup();
         SkyShipsEntities.setup();
+        SkyShipsPOITypes.setup();
 
         tryCompat("transport", () -> SkyShipsTransport::setup);
     }

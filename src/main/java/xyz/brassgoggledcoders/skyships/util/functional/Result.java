@@ -1,5 +1,6 @@
 package xyz.brassgoggledcoders.skyships.util.functional;
 
+import net.minecraftforge.common.util.NonNullFunction;
 import net.minecraftforge.common.util.NonNullSupplier;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,6 +16,10 @@ public interface Result<T> {
 
     @NotNull
     T value();
+
+    @NotNull <U> U fold(NonNullFunction<T, U> present, NonNullSupplier<U> empty);
+
+    Result<T> or(Result<T> other);
 
     default Result<T> run(NonNullSupplier<Optional<T>> runner) {
         if (this.hasRun()) {
@@ -57,6 +62,17 @@ public interface Result<T> {
         public T value() {
             return this.value;
         }
+
+        @Override
+        @NotNull
+        public <U> U fold(NonNullFunction<T, U> present, NonNullSupplier<U> empty) {
+            return present.apply(this.value());
+        }
+
+        @Override
+        public Result<T> or(Result<T> other) {
+            return this;
+        }
     }
 
     class Failure implements Result<Void> {
@@ -76,6 +92,17 @@ public interface Result<T> {
         public Void value() {
             throw new IllegalStateException("Failure does not have a value");
         }
+
+        @Override
+        @NotNull
+        public <U> U fold(NonNullFunction<Void, U> present, NonNullSupplier<U> empty) {
+            return empty.get();
+        }
+
+        @Override
+        public Result<Void> or(Result<Void> other) {
+            return other;
+        }
     }
 
     class Waiting implements Result<Void> {
@@ -94,6 +121,17 @@ public interface Result<T> {
         @NotNull
         public Void value() {
             throw new IllegalStateException("Waiting does not have a value");
+        }
+
+        @Override
+        @NotNull
+        public <U> U fold(NonNullFunction<Void, U> present, NonNullSupplier<U> empty) {
+            return empty.get();
+        }
+
+        @Override
+        public Result<Void> or(Result<Void> other) {
+            return other;
         }
     }
 }
