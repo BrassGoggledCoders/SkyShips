@@ -53,10 +53,10 @@ public class Navigator {
                 int yawDirection = 0;
 
                 float delta = getDelta(destination);
-                if (delta < 175 && delta > 5) {
-                    yawDirection = 1;
-                } else if (delta > 185 && delta < 355) {
+                if (delta < -5) {
                     yawDirection = -1;
+                } else if (delta > 5) {
+                    yawDirection = 1;
                 }
 
                 this.skyShip.navigateBoat(yawDirection, yawDirection == 0 ? 1 : 0, vertical);
@@ -72,11 +72,14 @@ public class Navigator {
 
         float delta = expectedYaw - this.skyShip.getYRot();
 
-        if (delta < 0) {
-            delta += 360;
-        } else if (delta > 360) {
-            delta -= 360;
+        while (delta < -180 || delta > 180) {
+            if (delta < -180) {
+                delta += 360;
+            } else {
+                delta -= 360;
+            }
         }
+
         return delta;
     }
 
