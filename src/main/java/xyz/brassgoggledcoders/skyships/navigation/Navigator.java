@@ -32,7 +32,7 @@ public class Navigator {
     public void navigate() {
         this.navigationItemResult = navigationItemResult.run(this::findNavigationItem);
 
-        if (this.navigationItemResult.isSuccess()) {
+        if (this.navigationItemResult.isSuccess() && !this.skyShip.getLevel().isClientSide()) {
             GlobalPos navigationItemPos = this.navigationItemResult.value();
 
             if (navigationItemPos.dimension() == this.skyShip.getLevel().dimension()) {
