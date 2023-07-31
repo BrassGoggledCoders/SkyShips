@@ -178,6 +178,15 @@ public class SkyShip extends Entity {
     }
 
     @Override
+    public boolean startRiding(@Nonnull Entity pVehicle, boolean force) {
+        boolean startRiding = super.startRiding(pVehicle, force);
+        if (startRiding) {
+            this.setPaddleState(false, false, 0);
+        }
+        return startRiding;
+    }
+
+    @Override
     public boolean canBeCollidedWith() {
         return true;
     }
@@ -312,7 +321,7 @@ public class SkyShip extends Entity {
                 if (this.getLevel().isClientSide()) {
                     this.controlBoat();
                     SkyShips.networkHandler.updateSkyShipControl(this.getPaddleState(0), this.getPaddleState(1), this.getInputVertical());
-                } else if (this.engine.isAdvanced() && this.getLevel().getGameTime() > this.lastPlayerControlTick + 100) {
+                } else if (this.getVehicle() == null && this.engine.isAdvanced() && this.getLevel().getGameTime() > this.lastPlayerControlTick + 100) {
                     this.navigator.navigate();
                 }
 
@@ -321,7 +330,7 @@ public class SkyShip extends Entity {
                 this.setDeltaMovement(Vec3.ZERO);
                 this.setPaddleState(false, false, 0);
             }
-        } else if (this.engine.isAdvanced() && this.getLevel().getGameTime() > this.lastPlayerControlTick + 100) {
+        } else if (this.getVehicle() == null && this.engine.isAdvanced() && this.getLevel().getGameTime() > this.lastPlayerControlTick + 100) {
             this.navigator.navigate();
         } else {
             this.setDeltaMovement(Vec3.ZERO);
