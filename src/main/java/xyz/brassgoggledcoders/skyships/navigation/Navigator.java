@@ -2,10 +2,13 @@ package xyz.brassgoggledcoders.skyships.navigation;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
+import xyz.brassgoggledcoders.skyships.content.SkyShipsPOITypes;
 import xyz.brassgoggledcoders.skyships.entity.SkyShip;
 import xyz.brassgoggledcoders.skyships.util.functional.Result;
 
