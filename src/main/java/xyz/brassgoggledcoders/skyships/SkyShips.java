@@ -15,6 +15,7 @@ import xyz.brassgoggledcoders.skyships.compat.transport.SkyShipsTransport;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsBlocks;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsEntities;
 import xyz.brassgoggledcoders.skyships.content.SkyShipsItems;
+import xyz.brassgoggledcoders.skyships.content.SkyShipsText;
 import xyz.brassgoggledcoders.skyships.network.NetworkHandler;
 import xyz.brassgoggledcoders.skyships.registrate.NonLivingEntityLootTables;
 
@@ -49,6 +50,7 @@ public class SkyShips {
         SkyShipsBlocks.setup();
         SkyShipsItems.setup();
         SkyShipsEntities.setup();
+        SkyShipsText.setup();
 
         tryCompat("transport", () -> SkyShipsTransport::setup);
     }

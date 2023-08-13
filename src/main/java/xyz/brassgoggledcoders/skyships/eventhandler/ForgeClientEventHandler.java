@@ -10,6 +10,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import xyz.brassgoggledcoders.skyships.SkyShips;
+import xyz.brassgoggledcoders.skyships.content.SkyShipsKeyMappings;
 import xyz.brassgoggledcoders.skyships.entity.SkyShip;
 
 @Mod.EventBusSubscriber(modid = SkyShips.ID, bus = Bus.FORGE, value = Dist.CLIENT)
@@ -19,14 +20,14 @@ public class ForgeClientEventHandler {
     public static void handlePaddleState(TickEvent.ClientTickEvent clientTickEvent) {
         if (clientTickEvent.phase == TickEvent.Phase.START && Minecraft.getInstance().player != null) {
             LocalPlayer player = Minecraft.getInstance().player;
-            if (player.getVehicle() instanceof SkyShip) {
+            if (player.getVehicle() instanceof SkyShip skyShip) {
                 Input input = player.input;
-                ((SkyShip) player.getVehicle()).setInput(
+                skyShip.setInput(
                         input.left,
                         input.right,
                         input.up,
                         input.down,
-                        input.jumping ? 1 : 0
+                        input.jumping ? 1 : SkyShipsKeyMappings.DESCEND.isDown() ? -1 : 0
                 );
             }
         }

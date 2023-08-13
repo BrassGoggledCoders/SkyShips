@@ -1,8 +1,8 @@
-// 1.19.2	2023-07-22T00:23:24.6603644	Registrate Provider for skyships [Recipes, Advancements, Loot tables, Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), Blockstates, Item models, Lang (en_us/en_ud), Shell Content Creator Data]
+// 1.19.2	2023-08-12T21:33:55.5725673	Registrate Provider for skyships [Recipes, Advancements, Loot tables, Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), Blockstates, Item models, Lang (en_us/en_ud), Shell Content Creator Data]
 fc57415160e637d104e6cbaee6225e47ee661bc4 assets/skyships/blockstates/aeroporte_controller.json
 4a7d4e15fc4fcd42965aa054061d391a721156c1 assets/skyships/blockstates/aeroporte_oak_post.json
-e7d8c54220e7750120e6ef9b13dfa2e5ee46d58e assets/skyships/lang/en_ud.json
-4ab582346d4e99bf131b917947f9716696caca4a assets/skyships/lang/en_us.json
+08b8c2172fee53508cfcb160000dfa51a1ce3c9f assets/skyships/lang/en_ud.json
+131275f7860fd67e888a7521039f03ea7c19648d assets/skyships/lang/en_us.json
 a7a1c26a7c6b0979efcf548430b04d9fca654080 assets/skyships/models/block/aeroporte_controller.json
 58237bccf2d2ac0864f498e6b9029b0f35f518ce assets/skyships/models/item/aeroporte_controller.json
 44f87f34e9acd12a181e425d6d1024d50f28b434 assets/skyships/models/item/aeroporte_oak_post.json
