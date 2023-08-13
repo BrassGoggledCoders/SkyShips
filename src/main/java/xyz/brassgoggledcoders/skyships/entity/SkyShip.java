@@ -602,10 +602,6 @@ public class SkyShip extends Entity {
                 } else {
                     f = -0.6F;
                 }
-
-                if (pPassenger instanceof Animal) {
-                    f = (float) ((double) f + 0.2D);
-                }
             }
 
             Vec3 vector3d = (new Vec3(f, 0.0D, 0.0D)).yRot(-this.getYRot() * ((float) Math.PI / 180F) - ((float) Math.PI / 2F));
