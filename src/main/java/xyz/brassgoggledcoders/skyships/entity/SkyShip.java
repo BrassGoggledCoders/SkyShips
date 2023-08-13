@@ -143,6 +143,15 @@ public class SkyShip extends Entity {
     }
 
     @Override
+    public boolean startRiding(@Nonnull Entity pVehicle, boolean force) {
+        boolean startRiding = super.startRiding(pVehicle, force);
+        if (startRiding) {
+            this.setPaddleState(false, false, 0);
+        }
+        return startRiding;
+    }
+
+    @Override
     public boolean canBeCollidedWith() {
         return true;
     }

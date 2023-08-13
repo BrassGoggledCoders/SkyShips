@@ -21,9 +21,11 @@ import javax.annotation.Nonnull;
 public class AeroporteHook extends Entity {
     private static final EntityDataAccessor<BlockPos> CONTROLLER_POS = SynchedEntityData.defineId(AeroporteHook.class, EntityDataSerializers.BLOCK_POS);
     private static final EntityDataAccessor<Float> TARGET_HEIGHT = SynchedEntityData.defineId(AeroporteHook.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Integer> TARGET_ID = SynchedEntityData.defineId(AeroporteHook.class, EntityDataSerializers.INT);
 
     private int controllerCheckTick = 0;
     private boolean releaseAtTarget;
+    private int ticksWithoutPassenger = 0;
 
     public AeroporteHook(EntityType<?> type, Level world) {
         super(type, world);
@@ -50,10 +52,29 @@ public class AeroporteHook extends Entity {
         return this.entityData.get(TARGET_HEIGHT);
     }
 
+    public int getTargetId() {
+        return this.entityData.get(TARGET_ID);
+    }
+
     @Override
     public void tick() {
         if (this.getFirstPassenger() == null) {
-            this.setRemoved(RemovalReason.KILLED);
+            if (this.getTargetId() > 0) {
+                Entity entity = this.getLevel().getEntity(this.getTargetId());
+                if (entity != null && entity.getVehicle() == null) {
+                    entity.startRiding(this);
+                }
+                if (this.ticksWithoutPassenger++ > 10) {
+                    this.setRemoved(RemovalReason.KILLED);
+                }
+            } else {
+                if (this.ticksWithoutPassenger++ > 100) {
+                    this.setRemoved(RemovalReason.KILLED);
+                }
+            }
+
+        } else {
+            this.ticksWithoutPassenger = 0;
         }
 
         if (this.controllerCheckTick-- <= 0) {
@@ -63,22 +84,24 @@ public class AeroporteHook extends Entity {
             this.controllerCheckTick = this.getLevel().getRandom().nextInt(50);
         }
 
-        if (Math.abs(this.getTargetHeight() - this.getY()) > 0.15F) {
-            if (this.getTargetHeight() > this.getY()) {
-                this.move(MoverType.SELF, new Vec3(0, 0.25F, 0));
-            } else {
-                this.move(MoverType.SELF, new Vec3(0, -0.25F, 0));
+        if (this.ticksWithoutPassenger <= 0) {
+            if (Math.abs(this.getTargetHeight() - this.getY()) > 0.15F) {
+                if (this.getTargetHeight() > this.getY()) {
+                    this.move(MoverType.SELF, new Vec3(0, 0.25F, 0));
+                } else {
+                    this.move(MoverType.SELF, new Vec3(0, -0.25F, 0));
+                }
+            } else if (this.isReleaseAtTarget()) {
+                this.getPassengers().forEach(Entity::stopRiding);
             }
-        } else if (this.isReleaseAtTarget()) {
-            this.getPassengers().forEach(Entity::stopRiding);
         }
     }
-
 
     @Override
     protected void defineSynchedData() {
         this.entityData.define(CONTROLLER_POS, BlockPos.ZERO);
         this.entityData.define(TARGET_HEIGHT, 0F);
+        this.entityData.define(TARGET_ID, -1);
     }
 
     @Override
@@ -91,6 +114,14 @@ public class AeroporteHook extends Entity {
     protected void addAdditionalSaveData(@Nonnull CompoundTag pCompound) {
         pCompound.put("controllerPos", NbtUtils.writeBlockPos(this.getControllerPos()));
         pCompound.putFloat("TargetHeight", this.getTargetHeight());
+    }
+
+    @Override
+    public void addPassenger(@Nonnull Entity passenger) {
+        super.addPassenger(passenger);
+        if (this.hasPassenger(passenger)) {
+            this.entityData.set(TARGET_ID, passenger.getId());
+        }
     }
 
     @Override
