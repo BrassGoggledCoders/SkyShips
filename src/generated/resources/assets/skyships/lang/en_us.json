@@ -7,5 +7,7 @@
   "entity.skyships.sky_ship": "Sky Ship",
   "item.skyships.shell_sky_ship": "Shell Sky Ship",
   "item.skyships.sky_ship": "Sky Ship",
-  "itemGroup.skyships": "Sky Ships"
+  "itemGroup.skyships": "Sky Ships",
+  "key.skyships.category": "SkyShips",
+  "key.skyships.descend": "Descend"
 }

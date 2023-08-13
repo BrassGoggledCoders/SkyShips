@@ -51,6 +51,7 @@ public class SkyShips {
         SkyShipsItems.setup();
         SkyShipsEntities.setup();
         SkyShipsPOITypes.setup();
+        SkyShipsText.setup();
 
         tryCompat("transport", () -> SkyShipsTransport::setup);
     }

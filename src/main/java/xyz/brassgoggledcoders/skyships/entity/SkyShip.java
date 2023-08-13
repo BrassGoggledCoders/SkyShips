@@ -381,7 +381,8 @@ public class SkyShip extends Entity {
     }
 
     public void floatBoat() {
-        double verticalAddition = this.entityData.get(DATA_ID_VERTICAL) > 0 ? 0.015D : this.isNoGravity() ? 0.0D : (double) -0.0004F;
+        int controlOffset = Integer.compare(this.entityData.get(DATA_ID_VERTICAL), 0);
+        double verticalAddition = controlOffset != 0 ? controlOffset * 0.015D : this.isNoGravity() ? 0.0D : (double) -0.0004F;
         double d2 = 0.0D;
         float invFriction = 0.05F;
         if (this.oldStatus == SkyShipStatus.IN_AIR && this.status != SkyShipStatus.IN_AIR && this.status != SkyShipStatus.ON_LAND) {
@@ -659,7 +660,7 @@ public class SkyShip extends Entity {
             Vec3 vector3d = this.getDeltaMovement();
             this.setDeltaMovement(new Vec3(
                     vector3d.x + Mth.sin(-this.getYRot() * ((float) Math.PI / 180F)) * f,
-                    this.inputVertical > 0 ? engine.getSpeedModifier(this) : 0F,
+                    Integer.compare(this.inputVertical, 0) * engine.getSpeedModifier(this),
                     vector3d.z + Mth.cos(this.getYRot() * ((float) Math.PI / 180F)) * f)
             );
             this.setPaddleState(this.inputRight && !this.inputLeft || this.inputUp, this.inputLeft && !this.inputRight || this.inputUp, inputVertical);
@@ -679,10 +680,6 @@ public class SkyShip extends Entity {
                     f = 0.4F;
                 } else {
                     f = -0.6F;
-                }
-
-                if (pPassenger instanceof Animal) {
-                    f = (float) ((double) f + 0.2D);
                 }
             }
 
