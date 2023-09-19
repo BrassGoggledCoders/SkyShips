@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'xyz.brassgoggledcoders'
-version = '0.4.0'
+version = '0.4.1'
 
 java {
     archivesBaseName = 'SkyShips'
@@ -101,7 +101,7 @@ jar {
     classifier = "nodep"
     manifest {
         attributes([
-                "Specification-Title"     : "mccivilizations",
+                "Specification-Title"     : "SkyShips",
                 "Specification-Vendor"    : "Brass Goggled Coders",
                 "Specification-Version"   : "1", // We are version 1 of ourselves
                 "Implementation-Title"    : project.name,
